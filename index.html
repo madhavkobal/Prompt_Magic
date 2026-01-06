@@ -1,0 +1,1616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Promptos - AI Prompt Engineering Platform</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- jsPDF for PDF Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <style>
+        /* ==================== CSS VARIABLES & THEMING ==================== */
+        :root {
+            --transition-speed: 0.3s;
+            --border-radius: 12px;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 16px rgba(0,0,0,0.2);
+            --shadow-lg: 0 8px 32px rgba(0,0,0,0.3);
+        }
+
+        /* Sleek Dark Theme (Default) */
+        [data-theme="sleek-dark"] {
+            --bg-primary: #0a0e27;
+            --bg-secondary: #141b3d;
+            --bg-tertiary: #1e2749;
+            --text-primary: #e4e7f1;
+            --text-secondary: #a8b3cf;
+            --text-muted: #6b7694;
+            --accent-primary: #00d9ff;
+            --accent-secondary: #7b2ff7;
+            --accent-success: #00ff88;
+            --accent-warning: #ffd700;
+            --accent-danger: #ff4757;
+            --border-color: #2a3454;
+            --input-bg: #1a2238;
+            --card-bg: #141b3d;
+        }
+
+        /* Midnight Blue Theme */
+        [data-theme="midnight-blue"] {
+            --bg-primary: #001529;
+            --bg-secondary: #002140;
+            --bg-tertiary: #003a6c;
+            --text-primary: #ffffff;
+            --text-secondary: #b8d4e8;
+            --text-muted: #7a9fb8;
+            --accent-primary: #1890ff;
+            --accent-secondary: #722ed1;
+            --accent-success: #52c41a;
+            --accent-warning: #faad14;
+            --accent-danger: #f5222d;
+            --border-color: #003a6c;
+            --input-bg: #002140;
+            --card-bg: #002140;
+        }
+
+        /* Professional Light Theme */
+        [data-theme="professional-light"] {
+            --bg-primary: #f5f7fa;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #e8ecef;
+            --text-primary: #2c3e50;
+            --text-secondary: #546e7a;
+            --text-muted: #90a4ae;
+            --accent-primary: #3498db;
+            --accent-secondary: #9b59b6;
+            --accent-success: #27ae60;
+            --accent-warning: #f39c12;
+            --accent-danger: #e74c3c;
+            --border-color: #dce4ec;
+            --input-bg: #ffffff;
+            --card-bg: #ffffff;
+        }
+
+        /* Solarized Theme */
+        [data-theme="solarized"] {
+            --bg-primary: #002b36;
+            --bg-secondary: #073642;
+            --bg-tertiary: #0e4b5a;
+            --text-primary: #fdf6e3;
+            --text-secondary: #93a1a1;
+            --text-muted: #657b83;
+            --accent-primary: #2aa198;
+            --accent-secondary: #6c71c4;
+            --accent-success: #859900;
+            --accent-warning: #b58900;
+            --accent-danger: #dc322f;
+            --border-color: #0e4b5a;
+            --input-bg: #073642;
+            --card-bg: #073642;
+        }
+
+        /* ==================== BASE STYLES ==================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background var(--transition-speed), color var(--transition-speed);
+            overflow-x: hidden;
+        }
+
+        /* ==================== NAVBAR ==================== */
+        .navbar-custom {
+            background: var(--bg-secondary) !important;
+            border-bottom: 2px solid var(--accent-primary);
+            box-shadow: var(--shadow-md);
+            backdrop-filter: blur(10px);
+        }
+
+        .navbar-brand {
+            font-size: 1.75rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-link {
+            color: var(--text-secondary) !important;
+            transition: color var(--transition-speed);
+            margin: 0 0.5rem;
+        }
+
+        .nav-link:hover {
+            color: var(--accent-primary) !important;
+        }
+
+        /* ==================== CARDS ==================== */
+        .card-custom {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-md);
+            transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+            margin-bottom: 1.5rem;
+        }
+
+        .card-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .card-header-custom {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+            padding: 1rem 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* ==================== FORMS ==================== */
+        .form-control-custom {
+            background: var(--input-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            padding: 0.75rem 1rem;
+            transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+        }
+
+        .form-control-custom:focus {
+            background: var(--input-bg);
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 0.2rem rgba(0, 217, 255, 0.25);
+            color: var(--text-primary);
+            outline: none;
+        }
+
+        .form-label-custom {
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        /* ==================== BUTTONS ==================== */
+        .btn-primary-custom {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border: none;
+            border-radius: 8px;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+            cursor: pointer;
+        }
+
+        .btn-primary-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 217, 255, 0.4);
+        }
+
+        .btn-secondary-custom {
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: all var(--transition-speed);
+            cursor: pointer;
+        }
+
+        .btn-secondary-custom:hover {
+            border-color: var(--accent-primary);
+            background: var(--input-bg);
+        }
+
+        .btn-icon {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* ==================== SCORE DISPLAY ==================== */
+        .score-container {
+            text-align: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary));
+            border-radius: var(--border-radius);
+            margin: 1.5rem 0;
+        }
+
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            position: relative;
+            background: conic-gradient(
+                var(--accent-primary) 0deg,
+                var(--accent-primary) calc(var(--score, 0) * 3.6deg),
+                var(--border-color) calc(var(--score, 0) * 3.6deg)
+            );
+        }
+
+        .score-circle::before {
+            content: '';
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            background: var(--bg-secondary);
+            position: absolute;
+        }
+
+        .score-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+            z-index: 1;
+        }
+
+        .score-label {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-top: 0.5rem;
+        }
+
+        /* ==================== FEEDBACK LIST ==================== */
+        .feedback-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feedback-item {
+            background: var(--bg-tertiary);
+            border-left: 4px solid var(--accent-primary);
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1rem;
+            transition: transform var(--transition-speed);
+        }
+
+        .feedback-item:hover {
+            transform: translateX(4px);
+        }
+
+        .feedback-item::before {
+            content: "→";
+            color: var(--accent-primary);
+            font-weight: bold;
+            margin-right: 0.75rem;
+        }
+
+        /* ==================== DIFF VIEW ==================== */
+        .diff-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .diff-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .diff-panel {
+            background: var(--bg-tertiary);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            border: 2px solid var(--border-color);
+        }
+
+        .diff-header {
+            font-weight: 600;
+            color: var(--accent-primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .diff-content {
+            color: var(--text-primary);
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        /* ==================== TEMPLATE CARDS ==================== */
+        .template-card {
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all var(--transition-speed);
+        }
+
+        .template-card:hover {
+            border-color: var(--accent-primary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .template-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .template-category {
+            display: inline-block;
+            background: var(--accent-primary);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .template-description {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* ==================== HISTORY ITEMS ==================== */
+        .history-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 1rem 1.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all var(--transition-speed);
+        }
+
+        .history-item:hover {
+            border-color: var(--accent-primary);
+            transform: translateX(4px);
+        }
+
+        .history-content {
+            flex: 1;
+        }
+
+        .history-prompt {
+            color: var(--text-primary);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .history-meta {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .history-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* ==================== MODAL CUSTOMIZATION ==================== */
+        .modal-content-custom {
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            color: var(--text-primary);
+        }
+
+        .modal-header-custom {
+            border-bottom: 2px solid var(--border-color);
+            padding: 1.5rem;
+        }
+
+        .modal-body-custom {
+            padding: 1.5rem;
+        }
+
+        .modal-footer-custom {
+            border-top: 2px solid var(--border-color);
+            padding: 1.5rem;
+        }
+
+        /* ==================== LOADING SPINNER ==================== */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ==================== BADGES ==================== */
+        .badge-custom {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .badge-success {
+            background: var(--accent-success);
+            color: white;
+        }
+
+        .badge-warning {
+            background: var(--accent-warning);
+            color: white;
+        }
+
+        .badge-danger {
+            background: var(--accent-danger);
+            color: white;
+        }
+
+        /* ==================== UTILITIES ==================== */
+        .text-gradient {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .glow {
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+        }
+
+        .container-main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        /* ==================== ANIMATIONS ==================== */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ==================== SCROLLBAR ==================== */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-primary);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-secondary);
+        }
+
+        /* ==================== RESPONSIVE ==================== */
+        @media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1.25rem;
+            }
+
+            .score-circle {
+                width: 120px;
+                height: 120px;
+            }
+
+            .score-circle::before {
+                width: 100px;
+                height: 100px;
+            }
+
+            .score-value {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body data-theme="sleek-dark">
+
+    <!-- ==================== NAVBAR ==================== -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i data-lucide="sparkles"></i> Promptos
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showSection('evaluate')">
+                            <i data-lucide="zap"></i> Evaluate
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showSection('templates')">
+                            <i data-lucide="layout-template"></i> Templates
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showSection('history')">
+                            <i data-lucide="history"></i> History
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="openSettingsModal()">
+                            <i data-lucide="settings"></i> Settings
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-main">
+
+        <!-- ==================== EVALUATE SECTION ==================== -->
+        <div id="evaluate-section" class="section-content">
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="card-custom animate__animated animate__fadeInLeft">
+                        <div class="card-header-custom">
+                            <span><i data-lucide="edit-3"></i> Prompt Input</span>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="mb-3">
+                                <label class="form-label-custom">Target LLM</label>
+                                <select id="targetModel" class="form-control-custom form-select">
+                                    <option value="ChatGPT">ChatGPT (OpenAI)</option>
+                                    <option value="Claude">Claude (Anthropic)</option>
+                                    <option value="Gemini">Gemini (Google)</option>
+                                    <option value="DeepSeek">DeepSeek</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label-custom">Your Prompt</label>
+                                <textarea id="promptInput" class="form-control-custom" rows="10"
+                                    placeholder="Enter your prompt here for evaluation..."></textarea>
+                            </div>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <button class="btn-primary-custom btn-icon" onclick="evaluatePrompt()">
+                                    <i data-lucide="search"></i> Evaluate Prompt
+                                </button>
+                                <button class="btn-secondary-custom btn-icon" onclick="improvePrompt()">
+                                    <i data-lucide="wand-2"></i> Improve Prompt
+                                </button>
+                                <button class="btn-secondary-custom btn-icon" onclick="clearInput()">
+                                    <i data-lucide="x"></i> Clear
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="card-custom animate__animated animate__fadeInRight">
+                        <div class="card-header-custom">
+                            <span><i data-lucide="bar-chart-2"></i> Evaluation Results</span>
+                        </div>
+                        <div class="card-body p-4">
+                            <div id="evaluationResults">
+                                <div class="text-center text-muted py-5">
+                                    <i data-lucide="info" style="width: 48px; height: 48px; margin-bottom: 1rem;"></i>
+                                    <p>Enter a prompt and click "Evaluate Prompt" to see results.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Improvement Results (Hidden by default) -->
+            <div id="improvementSection" style="display: none;">
+                <div class="card-custom animate__animated animate__fadeInUp">
+                    <div class="card-header-custom">
+                        <span><i data-lucide="sparkles"></i> Improved Prompt</span>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="diff-container">
+                            <div class="diff-panel">
+                                <div class="diff-header">
+                                    <i data-lucide="file-text"></i> Original
+                                </div>
+                                <div class="diff-content" id="originalPrompt"></div>
+                            </div>
+                            <div class="diff-panel">
+                                <div class="diff-header">
+                                    <i data-lucide="sparkles"></i> Improved
+                                </div>
+                                <div class="diff-content" id="improvedPrompt"></div>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <h6 class="text-gradient mb-3">Why These Changes?</h6>
+                            <div id="improvementReasoning" class="text-secondary"></div>
+                        </div>
+                        <div class="mt-3">
+                            <button class="btn-primary-custom btn-icon" onclick="useImprovedPrompt()">
+                                <i data-lucide="check"></i> Use Improved Prompt
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== TEMPLATES SECTION ==================== -->
+        <div id="templates-section" class="section-content" style="display: none;">
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h2 class="text-gradient">Prompt Templates</h2>
+                        <button class="btn-primary-custom btn-icon" onclick="openCreateTemplateModal()">
+                            <i data-lucide="plus"></i> Create Template
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <input type="text" id="templateSearch" class="form-control-custom"
+                        placeholder="Search templates..." onkeyup="filterTemplates()">
+                </div>
+                <div class="col-md-6">
+                    <select id="categoryFilter" class="form-control-custom form-select" onchange="filterTemplates()">
+                        <option value="">All Categories</option>
+                        <option value="Creative">Creative</option>
+                        <option value="Business">Business</option>
+                        <option value="Coding">Coding</option>
+                        <option value="Education">Education</option>
+                        <option value="Data">Data Analysis</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="templatesContainer" class="row">
+                <!-- Templates will be dynamically inserted here -->
+            </div>
+        </div>
+
+        <!-- ==================== HISTORY SECTION ==================== -->
+        <div id="history-section" class="section-content" style="display: none;">
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h2 class="text-gradient">Evaluation History</h2>
+                        <div class="d-flex gap-2">
+                            <button class="btn-secondary-custom btn-icon" onclick="exportHistory('markdown')">
+                                <i data-lucide="download"></i> Export MD
+                            </button>
+                            <button class="btn-secondary-custom btn-icon" onclick="exportHistory('pdf')">
+                                <i data-lucide="file-text"></i> Export PDF
+                            </button>
+                            <button class="btn-secondary-custom btn-icon" onclick="clearHistory()">
+                                <i data-lucide="trash-2"></i> Clear History
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="historyContainer">
+                <!-- History items will be dynamically inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SETTINGS MODAL ==================== -->
+    <div class="modal fade" id="settingsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content modal-content-custom">
+                <div class="modal-header modal-header-custom">
+                    <h5 class="modal-title"><i data-lucide="settings"></i> Settings</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body modal-body-custom">
+                    <div class="mb-4">
+                        <label class="form-label-custom">Google Gemini API Key</label>
+                        <input type="password" id="apiKeyInput" class="form-control-custom"
+                            placeholder="Enter your API key">
+                        <small class="text-muted">Get your API key from <a href="https://makersuite.google.com/app/apikey" target="_blank">Google AI Studio</a></small>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label-custom">Gemini Model</label>
+                        <select id="geminiModel" class="form-control-custom form-select">
+                            <option value="gemini-1.5-pro-latest">Gemini 1.5 Pro</option>
+                            <option value="gemini-1.5-flash-latest">Gemini 1.5 Flash</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label-custom">Theme</label>
+                        <select id="themeSelect" class="form-control-custom form-select" onchange="changeTheme()">
+                            <option value="sleek-dark">Sleek Dark</option>
+                            <option value="midnight-blue">Midnight Blue</option>
+                            <option value="professional-light">Professional Light</option>
+                            <option value="solarized">Solarized</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer modal-footer-custom">
+                    <button type="button" class="btn-secondary-custom" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn-primary-custom" onclick="saveSettings()">Save Settings</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== CREATE TEMPLATE MODAL ==================== -->
+    <div class="modal fade" id="createTemplateModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content modal-content-custom">
+                <div class="modal-header modal-header-custom">
+                    <h5 class="modal-title"><i data-lucide="plus"></i> Create Template</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body modal-body-custom">
+                    <div class="mb-3">
+                        <label class="form-label-custom">Template Name</label>
+                        <input type="text" id="templateName" class="form-control-custom"
+                            placeholder="E.g., Blog Post Generator">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label-custom">Category</label>
+                        <select id="templateCategory" class="form-control-custom form-select">
+                            <option value="Creative">Creative</option>
+                            <option value="Business">Business</option>
+                            <option value="Coding">Coding</option>
+                            <option value="Education">Education</option>
+                            <option value="Data">Data Analysis</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label-custom">Description</label>
+                        <input type="text" id="templateDescription" class="form-control-custom"
+                            placeholder="Brief description of what this template does">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label-custom">Template Content</label>
+                        <textarea id="templateContent" class="form-control-custom" rows="8"
+                            placeholder="Write your template here. Use [Variable] for placeholders, [Tone:Professional] for options, etc."></textarea>
+                        <small class="text-muted">
+                            Use syntax: [Topic], [Tone:Professional|Casual], [Format:List|Table]
+                        </small>
+                    </div>
+                </div>
+                <div class="modal-footer modal-footer-custom">
+                    <button type="button" class="btn-secondary-custom" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn-primary-custom" onclick="saveTemplate()">Save Template</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== TEMPLATE USE MODAL ==================== -->
+    <div class="modal fade" id="useTemplateModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content modal-content-custom">
+                <div class="modal-header modal-header-custom">
+                    <h5 class="modal-title" id="useTemplateTitle"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body modal-body-custom">
+                    <div id="templateVariablesForm">
+                        <!-- Dynamic form fields will be inserted here -->
+                    </div>
+                    <div class="mt-4">
+                        <label class="form-label-custom">Preview</label>
+                        <div id="templatePreview" class="form-control-custom" style="min-height: 150px; white-space: pre-wrap;"></div>
+                    </div>
+                </div>
+                <div class="modal-footer modal-footer-custom">
+                    <button type="button" class="btn-secondary-custom" onclick="deleteCurrentTemplate()">
+                        <i data-lucide="trash-2"></i> Delete
+                    </button>
+                    <button type="button" class="btn-secondary-custom" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn-primary-custom" onclick="useTemplateInEvaluate()">Use This Prompt</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- ==================== JAVASCRIPT APPLICATION ==================== -->
+    <script>
+        // ==================== STATE MANAGEMENT ====================
+        let appState = {
+            apiKey: localStorage.getItem('gemini_api_key') || '',
+            geminiModel: localStorage.getItem('gemini_model') || 'gemini-1.5-pro-latest',
+            theme: localStorage.getItem('theme') || 'sleek-dark',
+            templates: JSON.parse(localStorage.getItem('templates') || '[]'),
+            history: JSON.parse(localStorage.getItem('history') || '[]'),
+            currentTemplate: null,
+            lastImprovedPrompt: ''
+        };
+
+        // ==================== INITIALIZATION ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Lucide icons
+            lucide.createIcons();
+
+            // Apply saved theme
+            document.body.setAttribute('data-theme', appState.theme);
+
+            // Load settings
+            document.getElementById('apiKeyInput').value = appState.apiKey;
+            document.getElementById('geminiModel').value = appState.geminiModel;
+            document.getElementById('themeSelect').value = appState.theme;
+
+            // Initialize default templates if none exist
+            if (appState.templates.length === 0) {
+                initializeDefaultTemplates();
+            }
+
+            // Render initial views
+            renderTemplates();
+            renderHistory();
+        });
+
+        // ==================== NAVIGATION ====================
+        function showSection(section) {
+            const sections = ['evaluate', 'templates', 'history'];
+            sections.forEach(s => {
+                const element = document.getElementById(`${s}-section`);
+                if (element) {
+                    element.style.display = s === section ? 'block' : 'none';
+                }
+            });
+
+            // Re-render if needed
+            if (section === 'templates') renderTemplates();
+            if (section === 'history') renderHistory();
+
+            // Reinitialize icons
+            setTimeout(() => lucide.createIcons(), 100);
+        }
+
+        // ==================== GEMINI API INTEGRATION ====================
+        async function callGeminiAPI(prompt, systemInstruction = '') {
+            if (!appState.apiKey) {
+                alert('Please set your Gemini API key in Settings first.');
+                openSettingsModal();
+                return null;
+            }
+
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${appState.geminiModel}:generateContent?key=${appState.apiKey}`;
+
+            const requestBody = {
+                contents: [{
+                    parts: [{
+                        text: systemInstruction ? `${systemInstruction}\n\n${prompt}` : prompt
+                    }]
+                }],
+                generationConfig: {
+                    temperature: 0.7,
+                    topK: 40,
+                    topP: 0.95,
+                    maxOutputTokens: 2048,
+                }
+            };
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error?.message || 'API request failed');
+                }
+
+                const data = await response.json();
+                return data.candidates[0].content.parts[0].text;
+            } catch (error) {
+                console.error('Gemini API Error:', error);
+                alert(`API Error: ${error.message}`);
+                return null;
+            }
+        }
+
+        // ==================== PROMPT EVALUATION ====================
+        async function evaluatePrompt() {
+            const promptText = document.getElementById('promptInput').value.trim();
+            const targetModel = document.getElementById('targetModel').value;
+
+            if (!promptText) {
+                alert('Please enter a prompt to evaluate.');
+                return;
+            }
+
+            // Show loading state
+            const resultsContainer = document.getElementById('evaluationResults');
+            resultsContainer.innerHTML = `
+                <div class="text-center py-5">
+                    <div class="loading-spinner mb-3"></div>
+                    <p class="text-muted">Evaluating your prompt...</p>
+                </div>
+            `;
+
+            const systemInstruction = `You are an expert prompt engineer. Evaluate the following prompt intended for ${targetModel}.
+
+Provide your response in this exact JSON format:
+{
+    "score": <number 0-100>,
+    "feedback": [
+        "specific feedback point 1",
+        "specific feedback point 2",
+        "specific feedback point 3"
+    ],
+    "strengths": ["strength 1", "strength 2"],
+    "improvements": ["improvement 1", "improvement 2"]
+}
+
+Consider:
+- Clarity and specificity
+- Context and background information
+- Appropriate constraints and requirements
+- Output format specifications
+- ${targetModel}-specific best practices`;
+
+            const response = await callGeminiAPI(promptText, systemInstruction);
+
+            if (response) {
+                try {
+                    // Extract JSON from response
+                    const jsonMatch = response.match(/\{[\s\S]*\}/);
+                    const evaluation = JSON.parse(jsonMatch[0]);
+
+                    // Display results
+                    displayEvaluationResults(evaluation, promptText, targetModel);
+
+                    // Save to history
+                    saveToHistory(promptText, targetModel, evaluation);
+                } catch (error) {
+                    console.error('Parse error:', error);
+                    resultsContainer.innerHTML = `
+                        <div class="alert alert-danger">
+                            Failed to parse evaluation results. Please try again.
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        function displayEvaluationResults(evaluation, promptText, targetModel) {
+            const scoreColor = evaluation.score >= 80 ? 'var(--accent-success)' :
+                              evaluation.score >= 60 ? 'var(--accent-warning)' :
+                              'var(--accent-danger)';
+
+            const resultsHTML = `
+                <div class="score-container">
+                    <div class="score-circle" style="--score: ${evaluation.score}">
+                        <div class="score-value">${evaluation.score}</div>
+                    </div>
+                    <div class="score-label">Quality Score for ${targetModel}</div>
+                </div>
+
+                ${evaluation.strengths && evaluation.strengths.length > 0 ? `
+                <div class="mb-4">
+                    <h6 class="text-gradient mb-3"><i data-lucide="check-circle"></i> Strengths</h6>
+                    <ul class="feedback-list">
+                        ${evaluation.strengths.map(s => `<li class="feedback-item">${s}</li>`).join('')}
+                    </ul>
+                </div>
+                ` : ''}
+
+                ${evaluation.improvements && evaluation.improvements.length > 0 ? `
+                <div class="mb-4">
+                    <h6 class="text-gradient mb-3"><i data-lucide="alert-circle"></i> Areas for Improvement</h6>
+                    <ul class="feedback-list">
+                        ${evaluation.improvements.map(i => `<li class="feedback-item">${i}</li>`).join('')}
+                    </ul>
+                </div>
+                ` : ''}
+
+                ${evaluation.feedback && evaluation.feedback.length > 0 ? `
+                <div>
+                    <h6 class="text-gradient mb-3"><i data-lucide="lightbulb"></i> Detailed Feedback</h6>
+                    <ul class="feedback-list">
+                        ${evaluation.feedback.map(f => `<li class="feedback-item">${f}</li>`).join('')}
+                    </ul>
+                </div>
+                ` : ''}
+            `;
+
+            document.getElementById('evaluationResults').innerHTML = resultsHTML;
+            lucide.createIcons();
+        }
+
+        // ==================== PROMPT IMPROVEMENT ====================
+        async function improvePrompt() {
+            const promptText = document.getElementById('promptInput').value.trim();
+            const targetModel = document.getElementById('targetModel').value;
+
+            if (!promptText) {
+                alert('Please enter a prompt to improve.');
+                return;
+            }
+
+            // Show loading
+            const improvementSection = document.getElementById('improvementSection');
+            improvementSection.style.display = 'block';
+            document.getElementById('improvedPrompt').innerHTML = '<div class="loading-spinner"></div> Generating improvement...';
+            document.getElementById('originalPrompt').textContent = promptText;
+
+            const systemInstruction = `You are an expert prompt engineer. Improve the following prompt for ${targetModel}.
+
+Provide your response in this exact JSON format:
+{
+    "improved_prompt": "the complete improved version",
+    "reasoning": "explanation of the key changes made and why"
+}
+
+Make the prompt:
+- More specific and clear
+- Better structured
+- More likely to get high-quality results from ${targetModel}
+- Include any missing context or constraints`;
+
+            const response = await callGeminiAPI(promptText, systemInstruction);
+
+            if (response) {
+                try {
+                    const jsonMatch = response.match(/\{[\s\S]*\}/);
+                    const improvement = JSON.parse(jsonMatch[0]);
+
+                    document.getElementById('improvedPrompt').textContent = improvement.improved_prompt;
+                    document.getElementById('improvementReasoning').textContent = improvement.reasoning;
+
+                    appState.lastImprovedPrompt = improvement.improved_prompt;
+
+                    // Scroll to improvement section
+                    improvementSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    lucide.createIcons();
+                } catch (error) {
+                    console.error('Parse error:', error);
+                    document.getElementById('improvedPrompt').innerHTML = '<div class="text-danger">Failed to generate improvement. Please try again.</div>';
+                }
+            }
+        }
+
+        function useImprovedPrompt() {
+            if (appState.lastImprovedPrompt) {
+                document.getElementById('promptInput').value = appState.lastImprovedPrompt;
+                showSection('evaluate');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function clearInput() {
+            document.getElementById('promptInput').value = '';
+            document.getElementById('improvementSection').style.display = 'none';
+        }
+
+        // ==================== TEMPLATE ENGINE ====================
+        function initializeDefaultTemplates() {
+            const defaultTemplates = [
+                {
+                    id: Date.now() + 1,
+                    name: 'Blog Post Generator',
+                    category: 'Creative',
+                    description: 'Generate engaging blog posts on any topic',
+                    content: 'Write a comprehensive blog post about [Topic]. The tone should be [Tone:Professional|Casual|Humorous]. Include [Sections:3|5|7] main sections and format the output as [Format:Markdown|HTML].'
+                },
+                {
+                    id: Date.now() + 2,
+                    name: 'Code Review Assistant',
+                    category: 'Coding',
+                    description: 'Get detailed code review feedback',
+                    content: 'Review the following [Language:Python|JavaScript|Java|C++] code. Focus on [Aspect:Performance|Security|Readability|Best Practices]. Provide specific suggestions for improvement.\n\nCode:\n[Code]'
+                },
+                {
+                    id: Date.now() + 3,
+                    name: 'Business Email Writer',
+                    category: 'Business',
+                    description: 'Craft professional business emails',
+                    content: 'Write a professional email to [Recipient] regarding [Subject]. The tone should be [Tone:Formal|Semi-formal|Friendly]. The email should [Action:Request|Inform|Propose|Follow-up].'
+                },
+                {
+                    id: Date.now() + 4,
+                    name: 'Data Analysis Guide',
+                    category: 'Data',
+                    description: 'Get help analyzing datasets',
+                    content: 'I have a dataset about [Dataset Description]. I want to [Goal:Find patterns|Predict outcomes|Identify correlations|Summarize insights]. The data includes [Variables]. Please suggest appropriate analysis methods and visualizations.'
+                },
+                {
+                    id: Date.now() + 5,
+                    name: 'Learning Curriculum',
+                    category: 'Education',
+                    description: 'Create personalized learning paths',
+                    content: 'Create a [Duration:1-week|1-month|3-month] learning curriculum for [Topic]. My current level is [Level:Beginner|Intermediate|Advanced]. Include daily tasks, resources, and milestones.'
+                }
+            ];
+
+            appState.templates = defaultTemplates;
+            localStorage.setItem('templates', JSON.stringify(appState.templates));
+        }
+
+        function parseTemplateVariables(templateContent) {
+            const variables = [];
+            const regex = /\[([^\]]+)\]/g;
+            let match;
+
+            while ((match = regex.exec(templateContent)) !== null) {
+                const varContent = match[1];
+                const parts = varContent.split(':');
+
+                if (parts.length === 1) {
+                    // Simple variable [Topic]
+                    variables.push({
+                        name: parts[0],
+                        type: 'text',
+                        placeholder: match[0]
+                    });
+                } else {
+                    // Variable with options [Tone:Professional|Casual]
+                    const name = parts[0];
+                    const options = parts[1].split('|');
+                    variables.push({
+                        name: name,
+                        type: 'select',
+                        options: options,
+                        placeholder: match[0]
+                    });
+                }
+            }
+
+            // Remove duplicates
+            const unique = [];
+            const seen = new Set();
+            for (const v of variables) {
+                if (!seen.has(v.placeholder)) {
+                    seen.add(v.placeholder);
+                    unique.push(v);
+                }
+            }
+
+            return unique;
+        }
+
+        function renderTemplates() {
+            const container = document.getElementById('templatesContainer');
+            const searchTerm = document.getElementById('templateSearch')?.value.toLowerCase() || '';
+            const categoryFilter = document.getElementById('categoryFilter')?.value || '';
+
+            let filtered = appState.templates;
+
+            if (searchTerm) {
+                filtered = filtered.filter(t =>
+                    t.name.toLowerCase().includes(searchTerm) ||
+                    t.description.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            if (categoryFilter) {
+                filtered = filtered.filter(t => t.category === categoryFilter);
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="col-12 text-center text-muted py-5">
+                        <i data-lucide="inbox" style="width: 48px; height: 48px; margin-bottom: 1rem;"></i>
+                        <p>No templates found.</p>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            container.innerHTML = filtered.map(template => `
+                <div class="col-md-6 col-lg-4">
+                    <div class="template-card" onclick="openTemplateModal(${template.id})">
+                        <div class="template-category">${template.category}</div>
+                        <div class="template-title">${template.name}</div>
+                        <div class="template-description">${template.description}</div>
+                    </div>
+                </div>
+            `).join('');
+
+            lucide.createIcons();
+        }
+
+        function filterTemplates() {
+            renderTemplates();
+        }
+
+        function openTemplateModal(templateId) {
+            const template = appState.templates.find(t => t.id === templateId);
+            if (!template) return;
+
+            appState.currentTemplate = template;
+
+            // Set modal title
+            document.getElementById('useTemplateTitle').innerHTML = `<i data-lucide="layout-template"></i> ${template.name}`;
+
+            // Parse variables and create form
+            const variables = parseTemplateVariables(template.content);
+            const formHTML = variables.map(v => {
+                if (v.type === 'text') {
+                    return `
+                        <div class="mb-3">
+                            <label class="form-label-custom">${v.name}</label>
+                            <input type="text" class="form-control-custom template-var-input"
+                                data-placeholder="${v.placeholder}"
+                                placeholder="Enter ${v.name}">
+                        </div>
+                    `;
+                } else {
+                    return `
+                        <div class="mb-3">
+                            <label class="form-label-custom">${v.name}</label>
+                            <select class="form-control-custom form-select template-var-input"
+                                data-placeholder="${v.placeholder}">
+                                ${v.options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+                            </select>
+                        </div>
+                    `;
+                }
+            }).join('');
+
+            document.getElementById('templateVariablesForm').innerHTML = formHTML || '<p class="text-muted">No variables to configure.</p>';
+
+            // Set initial preview
+            updateTemplatePreview();
+
+            // Add event listeners
+            document.querySelectorAll('.template-var-input').forEach(input => {
+                input.addEventListener('input', updateTemplatePreview);
+                input.addEventListener('change', updateTemplatePreview);
+            });
+
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('useTemplateModal'));
+            modal.show();
+
+            lucide.createIcons();
+        }
+
+        function updateTemplatePreview() {
+            if (!appState.currentTemplate) return;
+
+            let preview = appState.currentTemplate.content;
+
+            document.querySelectorAll('.template-var-input').forEach(input => {
+                const placeholder = input.getAttribute('data-placeholder');
+                const value = input.value || placeholder;
+                preview = preview.replace(new RegExp(placeholder.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), value);
+            });
+
+            document.getElementById('templatePreview').textContent = preview;
+        }
+
+        function useTemplateInEvaluate() {
+            const preview = document.getElementById('templatePreview').textContent;
+            document.getElementById('promptInput').value = preview;
+
+            // Close modal and switch to evaluate
+            bootstrap.Modal.getInstance(document.getElementById('useTemplateModal')).hide();
+            showSection('evaluate');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function deleteCurrentTemplate() {
+            if (!appState.currentTemplate) return;
+
+            if (confirm(`Are you sure you want to delete "${appState.currentTemplate.name}"?`)) {
+                appState.templates = appState.templates.filter(t => t.id !== appState.currentTemplate.id);
+                localStorage.setItem('templates', JSON.stringify(appState.templates));
+
+                bootstrap.Modal.getInstance(document.getElementById('useTemplateModal')).hide();
+                renderTemplates();
+            }
+        }
+
+        // ==================== CREATE TEMPLATE ====================
+        function openCreateTemplateModal() {
+            // Clear form
+            document.getElementById('templateName').value = '';
+            document.getElementById('templateDescription').value = '';
+            document.getElementById('templateContent').value = '';
+            document.getElementById('templateCategory').value = 'Creative';
+
+            const modal = new bootstrap.Modal(document.getElementById('createTemplateModal'));
+            modal.show();
+        }
+
+        function saveTemplate() {
+            const name = document.getElementById('templateName').value.trim();
+            const description = document.getElementById('templateDescription').value.trim();
+            const content = document.getElementById('templateContent').value.trim();
+            const category = document.getElementById('templateCategory').value;
+
+            if (!name || !content) {
+                alert('Please fill in at least the name and content fields.');
+                return;
+            }
+
+            const template = {
+                id: Date.now(),
+                name,
+                category,
+                description: description || 'Custom template',
+                content
+            };
+
+            appState.templates.push(template);
+            localStorage.setItem('templates', JSON.stringify(appState.templates));
+
+            bootstrap.Modal.getInstance(document.getElementById('createTemplateModal')).hide();
+            showSection('templates');
+            renderTemplates();
+        }
+
+        // ==================== HISTORY ====================
+        function saveToHistory(prompt, targetModel, evaluation) {
+            const historyItem = {
+                id: Date.now(),
+                timestamp: new Date().toISOString(),
+                prompt: prompt,
+                targetModel: targetModel,
+                score: evaluation.score,
+                evaluation: evaluation
+            };
+
+            appState.history.unshift(historyItem);
+
+            // Keep only last 50 items
+            if (appState.history.length > 50) {
+                appState.history = appState.history.slice(0, 50);
+            }
+
+            localStorage.setItem('history', JSON.stringify(appState.history));
+        }
+
+        function renderHistory() {
+            const container = document.getElementById('historyContainer');
+
+            if (appState.history.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-muted py-5">
+                        <i data-lucide="inbox" style="width: 48px; height: 48px; margin-bottom: 1rem;"></i>
+                        <p>No evaluation history yet.</p>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            container.innerHTML = appState.history.map(item => {
+                const date = new Date(item.timestamp).toLocaleString();
+                const scoreClass = item.score >= 80 ? 'success' : item.score >= 60 ? 'warning' : 'danger';
+
+                return `
+                    <div class="history-item">
+                        <div class="history-content">
+                            <div class="history-prompt">${item.prompt.substring(0, 100)}${item.prompt.length > 100 ? '...' : ''}</div>
+                            <div class="history-meta">
+                                <span class="badge badge-custom badge-${scoreClass}">Score: ${item.score}</span>
+                                <span class="ms-2">${item.targetModel}</span>
+                                <span class="ms-2">${date}</span>
+                            </div>
+                        </div>
+                        <div class="history-actions">
+                            <button class="btn-secondary-custom btn-sm" onclick="rerunHistoryItem(${item.id})" title="Reuse this prompt">
+                                <i data-lucide="refresh-cw"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            lucide.createIcons();
+        }
+
+        function rerunHistoryItem(id) {
+            const item = appState.history.find(h => h.id === id);
+            if (item) {
+                document.getElementById('promptInput').value = item.prompt;
+                document.getElementById('targetModel').value = item.targetModel;
+                showSection('evaluate');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function clearHistory() {
+            if (confirm('Are you sure you want to clear all history?')) {
+                appState.history = [];
+                localStorage.setItem('history', JSON.stringify(appState.history));
+                renderHistory();
+            }
+        }
+
+        // ==================== EXPORT ====================
+        function exportHistory(format) {
+            if (appState.history.length === 0) {
+                alert('No history to export.');
+                return;
+            }
+
+            if (format === 'markdown') {
+                exportAsMarkdown();
+            } else if (format === 'pdf') {
+                exportAsPDF();
+            }
+        }
+
+        function exportAsMarkdown() {
+            let markdown = '# Promptos Evaluation History\n\n';
+            markdown += `Generated: ${new Date().toLocaleString()}\n\n`;
+            markdown += '---\n\n';
+
+            appState.history.forEach((item, index) => {
+                markdown += `## Evaluation ${index + 1}\n\n`;
+                markdown += `**Date:** ${new Date(item.timestamp).toLocaleString()}\n\n`;
+                markdown += `**Target Model:** ${item.targetModel}\n\n`;
+                markdown += `**Score:** ${item.score}/100\n\n`;
+                markdown += `**Prompt:**\n\`\`\`\n${item.prompt}\n\`\`\`\n\n`;
+
+                if (item.evaluation.strengths && item.evaluation.strengths.length > 0) {
+                    markdown += `**Strengths:**\n`;
+                    item.evaluation.strengths.forEach(s => markdown += `- ${s}\n`);
+                    markdown += '\n';
+                }
+
+                if (item.evaluation.improvements && item.evaluation.improvements.length > 0) {
+                    markdown += `**Areas for Improvement:**\n`;
+                    item.evaluation.improvements.forEach(i => markdown += `- ${i}\n`);
+                    markdown += '\n';
+                }
+
+                markdown += '---\n\n';
+            });
+
+            // Download
+            const blob = new Blob([markdown], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `promptos-history-${Date.now()}.md`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function exportAsPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            let yPos = 20;
+            const lineHeight = 7;
+            const pageHeight = doc.internal.pageSize.height;
+            const margin = 20;
+
+            // Title
+            doc.setFontSize(20);
+            doc.text('Promptos Evaluation History', margin, yPos);
+            yPos += 10;
+
+            doc.setFontSize(10);
+            doc.text(`Generated: ${new Date().toLocaleString()}`, margin, yPos);
+            yPos += 15;
+
+            appState.history.forEach((item, index) => {
+                // Check if we need a new page
+                if (yPos > pageHeight - 40) {
+                    doc.addPage();
+                    yPos = 20;
+                }
+
+                doc.setFontSize(14);
+                doc.text(`Evaluation ${index + 1}`, margin, yPos);
+                yPos += lineHeight;
+
+                doc.setFontSize(10);
+                doc.text(`Date: ${new Date(item.timestamp).toLocaleString()}`, margin, yPos);
+                yPos += lineHeight;
+                doc.text(`Target Model: ${item.targetModel}`, margin, yPos);
+                yPos += lineHeight;
+                doc.text(`Score: ${item.score}/100`, margin, yPos);
+                yPos += lineHeight + 2;
+
+                doc.text('Prompt:', margin, yPos);
+                yPos += lineHeight;
+
+                const splitPrompt = doc.splitTextToSize(item.prompt, 170);
+                splitPrompt.forEach(line => {
+                    if (yPos > pageHeight - 20) {
+                        doc.addPage();
+                        yPos = 20;
+                    }
+                    doc.text(line, margin + 5, yPos);
+                    yPos += lineHeight;
+                });
+
+                yPos += 5;
+            });
+
+            doc.save(`promptos-history-${Date.now()}.pdf`);
+        }
+
+        // ==================== SETTINGS ====================
+        function openSettingsModal() {
+            const modal = new bootstrap.Modal(document.getElementById('settingsModal'));
+            modal.show();
+        }
+
+        function saveSettings() {
+            const apiKey = document.getElementById('apiKeyInput').value.trim();
+            const geminiModel = document.getElementById('geminiModel').value;
+
+            if (!apiKey) {
+                alert('Please enter an API key.');
+                return;
+            }
+
+            appState.apiKey = apiKey;
+            appState.geminiModel = geminiModel;
+
+            localStorage.setItem('gemini_api_key', apiKey);
+            localStorage.setItem('gemini_model', geminiModel);
+
+            bootstrap.Modal.getInstance(document.getElementById('settingsModal')).hide();
+            alert('Settings saved successfully!');
+        }
+
+        function changeTheme() {
+            const theme = document.getElementById('themeSelect').value;
+            document.body.setAttribute('data-theme', theme);
+            appState.theme = theme;
+            localStorage.setItem('theme', theme);
+        }
+    </script>
+</body>
+</html>
