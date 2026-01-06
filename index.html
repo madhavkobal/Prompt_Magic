@@ -24,6 +24,154 @@
             --shadow-lg: 0 8px 32px rgba(0,0,0,0.3);
         }
 
+        /* ==================== TOAST NOTIFICATIONS ==================== */
+        .toast-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 9999;
+            max-width: 400px;
+        }
+
+        .toast-notification {
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-left: 4px solid var(--accent-primary);
+            border-radius: var(--border-radius);
+            padding: 1rem 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        .toast-notification.success {
+            border-left-color: var(--accent-success);
+        }
+
+        .toast-notification.error {
+            border-left-color: var(--accent-danger);
+        }
+
+        .toast-notification.warning {
+            border-left-color: var(--accent-warning);
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .toast-message {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0;
+            transition: color var(--transition-speed);
+        }
+
+        .toast-close:hover {
+            color: var(--accent-danger);
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* ==================== COPY BUTTON ==================== */
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 0.5rem;
+            cursor: pointer;
+            transition: all var(--transition-speed);
+            opacity: 0.7;
+        }
+
+        .copy-btn:hover {
+            opacity: 1;
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .position-relative {
+            position: relative;
+        }
+
+        /* ==================== OFFLINE INDICATOR ==================== */
+        .offline-banner {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            background: var(--accent-danger);
+            color: white;
+            padding: 0.75rem;
+            text-align: center;
+            z-index: 9998;
+            display: none;
+            animation: slideInDown 0.3s ease-out;
+        }
+
+        .offline-banner.show {
+            display: block;
+        }
+
+        @keyframes slideInDown {
+            from {
+                transform: translateY(-100%);
+            }
+            to {
+                transform: translateY(0);
+            }
+        }
+
+        /* ==================== BUTTON LOADING STATE ==================== */
+        .btn-loading {
+            position: relative;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .btn-loading::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 50%;
+            left: 50%;
+            margin-left: -8px;
+            margin-top: -8px;
+            border: 2px solid transparent;
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
         /* Sleek Dark Theme (Default) */
         [data-theme="sleek-dark"] {
             --bg-primary: #0a0e27;
@@ -548,6 +696,14 @@
 </head>
 <body data-theme="sleek-dark">
 
+    <!-- ==================== OFFLINE BANNER ==================== -->
+    <div id="offlineBanner" class="offline-banner">
+        <i data-lucide="wifi-off"></i> You are currently offline. Some features may not work.
+    </div>
+
+    <!-- ==================== TOAST CONTAINER ==================== -->
+    <div id="toastContainer" class="toast-container"></div>
+
     <!-- ==================== NAVBAR ==================== -->
     <nav class="navbar navbar-expand-lg navbar-dark navbar-custom sticky-top">
         <div class="container-fluid">
@@ -607,7 +763,11 @@
                             <div class="mb-3">
                                 <label class="form-label-custom">Your Prompt</label>
                                 <textarea id="promptInput" class="form-control-custom" rows="10"
-                                    placeholder="Enter your prompt here for evaluation..."></textarea>
+                                    placeholder="Enter your prompt here for evaluation..." maxlength="5000"></textarea>
+                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                    <small class="text-muted" id="charCount">0 / 5000 characters</small>
+                                    <small class="text-muted">Press Ctrl+Enter to evaluate</small>
+                                </div>
                             </div>
                             <div class="d-flex gap-2 flex-wrap">
                                 <button class="btn-primary-custom btn-icon" onclick="evaluatePrompt()">
@@ -649,16 +809,22 @@
                     </div>
                     <div class="card-body p-4">
                         <div class="diff-container">
-                            <div class="diff-panel">
+                            <div class="diff-panel position-relative">
                                 <div class="diff-header">
                                     <i data-lucide="file-text"></i> Original
                                 </div>
+                                <button class="copy-btn" onclick="copyToClipboard('originalPrompt')" title="Copy to clipboard">
+                                    <i data-lucide="copy" style="width: 16px; height: 16px;"></i>
+                                </button>
                                 <div class="diff-content" id="originalPrompt"></div>
                             </div>
-                            <div class="diff-panel">
+                            <div class="diff-panel position-relative">
                                 <div class="diff-header">
                                     <i data-lucide="sparkles"></i> Improved
                                 </div>
+                                <button class="copy-btn" onclick="copyToClipboard('improvedPrompt')" title="Copy to clipboard">
+                                    <i data-lucide="copy" style="width: 16px; height: 16px;"></i>
+                                </button>
                                 <div class="diff-content" id="improvedPrompt"></div>
                             </div>
                         </div>
@@ -771,6 +937,19 @@
                             <option value="solarized">Solarized</option>
                         </select>
                     </div>
+
+                    <div class="mb-4">
+                        <label class="form-label-custom">Data Management</label>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn-secondary-custom btn-icon flex-1" onclick="exportAllData()">
+                                <i data-lucide="download"></i> Export All Data
+                            </button>
+                            <button type="button" class="btn-secondary-custom btn-icon flex-1" onclick="importAllData()">
+                                <i data-lucide="upload"></i> Import Data
+                            </button>
+                        </div>
+                        <small class="text-muted">Backup or restore your templates and history</small>
+                    </div>
                 </div>
                 <div class="modal-footer modal-footer-custom">
                     <button type="button" class="btn-secondary-custom" data-bs-dismiss="modal">Cancel</button>
@@ -857,21 +1036,263 @@
         </div>
     </div>
 
+    <!-- Hidden file input for data import -->
+    <input type="file" id="fileImportInput" accept=".json" style="display: none;" onchange="handleFileImport(event)">
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- ==================== JAVASCRIPT APPLICATION ==================== -->
     <script>
+        // ==================== CONSTANTS ====================
+        const CONFIG = {
+            MAX_HISTORY_ITEMS: 50,
+            MAX_PROMPT_LENGTH: 5000,
+            DEBOUNCE_DELAY: 300,
+            API_TIMEOUT: 30000,
+            CACHE_SIZE: 20,
+            CACHE_DURATION: 3600000, // 1 hour
+            RETRY_ATTEMPTS: 3,
+            RETRY_DELAY_BASE: 2000, // 2 seconds
+            TOAST_DURATION: 5000
+        };
+
         // ==================== STATE MANAGEMENT ====================
         let appState = {
-            apiKey: localStorage.getItem('gemini_api_key') || '',
+            apiKey: localStorage.getItem('gemini_api_key') ? deobfuscateKey(localStorage.getItem('gemini_api_key')) : '',
             geminiModel: localStorage.getItem('gemini_model') || 'gemini-1.5-pro-latest',
             theme: localStorage.getItem('theme') || 'sleek-dark',
             templates: JSON.parse(localStorage.getItem('templates') || '[]'),
             history: JSON.parse(localStorage.getItem('history') || '[]'),
             currentTemplate: null,
-            lastImprovedPrompt: ''
+            lastImprovedPrompt: '',
+            apiCache: new Map()
         };
+
+        // ==================== UTILITY FUNCTIONS ====================
+
+        // Generate unique ID
+        function generateId() {
+            return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        }
+
+        // Debounce function
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func.apply(this, args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // API Key obfuscation
+        function obfuscateKey(key) {
+            return btoa(key.split('').reverse().join(''));
+        }
+
+        function deobfuscateKey(encoded) {
+            try {
+                return atob(encoded).split('').reverse().join('');
+            } catch (e) {
+                return encoded; // Return as-is if not encoded
+            }
+        }
+
+        // Sleep utility for retry logic
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // ==================== TOAST NOTIFICATIONS ====================
+
+        function showToast(title, message, type = 'info') {
+            const toastContainer = document.getElementById('toastContainer');
+            const toastId = generateId();
+
+            const toast = document.createElement('div');
+            toast.className = `toast-notification ${type}`;
+            toast.id = toastId;
+            toast.innerHTML = `
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-message">${message}</div>
+                </div>
+                <button class="toast-close" onclick="closeToast('${toastId}')">
+                    <i data-lucide="x" style="width: 20px; height: 20px;"></i>
+                </button>
+            `;
+
+            toastContainer.appendChild(toast);
+            lucide.createIcons();
+
+            // Auto-remove after duration
+            setTimeout(() => closeToast(toastId), CONFIG.TOAST_DURATION);
+        }
+
+        function closeToast(toastId) {
+            const toast = document.getElementById(toastId);
+            if (toast) {
+                toast.style.animation = 'slideInRight 0.3s ease-out reverse';
+                setTimeout(() => toast.remove(), 300);
+            }
+        }
+
+        // ==================== COPY TO CLIPBOARD ====================
+
+        async function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent;
+
+            try {
+                await navigator.clipboard.writeText(text);
+                showToast('Copied!', 'Text copied to clipboard', 'success');
+            } catch (err) {
+                showToast('Error', 'Failed to copy text', 'error');
+            }
+        }
+
+        // ==================== OFFLINE DETECTION ====================
+
+        function updateOnlineStatus() {
+            const banner = document.getElementById('offlineBanner');
+            if (!navigator.onLine) {
+                banner.classList.add('show');
+            } else {
+                banner.classList.remove('show');
+            }
+        }
+
+        window.addEventListener('online', updateOnlineStatus);
+        window.addEventListener('offline', updateOnlineStatus);
+
+        // ==================== BUTTON LOADING STATE ====================
+
+        function setButtonLoading(button, isLoading) {
+            if (isLoading) {
+                button.classList.add('btn-loading');
+                button.disabled = true;
+            } else {
+                button.classList.remove('btn-loading');
+                button.disabled = false;
+            }
+        }
+
+        // ==================== DATA MANAGEMENT ====================
+
+        function exportAllData() {
+            const data = {
+                version: '1.0',
+                exportDate: new Date().toISOString(),
+                templates: appState.templates,
+                history: appState.history,
+                settings: {
+                    theme: appState.theme,
+                    geminiModel: appState.geminiModel
+                }
+            };
+
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `promptos-backup-${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            showToast('Success', 'Data exported successfully', 'success');
+        }
+
+        function importAllData() {
+            document.getElementById('fileImportInput').click();
+        }
+
+        function handleFileImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+
+                    // Validate data structure
+                    if (!data.version || !data.templates || !data.history) {
+                        throw new Error('Invalid backup file format');
+                    }
+
+                    // Restore data
+                    appState.templates = data.templates;
+                    appState.history = data.history;
+
+                    if (data.settings) {
+                        appState.theme = data.settings.theme || appState.theme;
+                        appState.geminiModel = data.settings.geminiModel || appState.geminiModel;
+                    }
+
+                    // Save to localStorage
+                    localStorage.setItem('templates', JSON.stringify(appState.templates));
+                    localStorage.setItem('history', JSON.stringify(appState.history));
+                    localStorage.setItem('theme', appState.theme);
+                    localStorage.setItem('gemini_model', appState.geminiModel);
+
+                    // Update UI
+                    document.body.setAttribute('data-theme', appState.theme);
+                    document.getElementById('themeSelect').value = appState.theme;
+                    document.getElementById('geminiModel').value = appState.geminiModel;
+
+                    renderTemplates();
+                    renderHistory();
+
+                    showToast('Success', 'Data imported successfully', 'success');
+                } catch (error) {
+                    showToast('Error', 'Failed to import data: ' + error.message, 'error');
+                }
+            };
+            reader.readAsText(file);
+
+            // Reset input
+            event.target.value = '';
+        }
+
+        // ==================== KEYBOARD SHORTCUTS ====================
+
+        function initKeyboardShortcuts() {
+            document.addEventListener('keydown', function(e) {
+                // Ctrl+Enter or Cmd+Enter to evaluate
+                if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                    const promptInput = document.getElementById('promptInput');
+                    if (document.activeElement === promptInput && promptInput.value.trim()) {
+                        e.preventDefault();
+                        evaluatePrompt();
+                    }
+                }
+
+                // Ctrl+/ or Cmd+/ to open settings
+                if ((e.ctrlKey || e.metaKey) && e.key === '/') {
+                    e.preventDefault();
+                    openSettingsModal();
+                }
+            });
+        }
+
+        // ==================== CHARACTER COUNTER ====================
+
+        function updateCharCount() {
+            const promptInput = document.getElementById('promptInput');
+            const charCount = document.getElementById('charCount');
+            const count = promptInput.value.length;
+            charCount.textContent = `${count} / ${CONFIG.MAX_PROMPT_LENGTH} characters`;
+
+            if (count > CONFIG.MAX_PROMPT_LENGTH * 0.9) {
+                charCount.style.color = 'var(--accent-warning)';
+            } else {
+                charCount.style.color = 'var(--text-muted)';
+            }
+        }
 
         // ==================== INITIALIZATION ====================
         document.addEventListener('DOMContentLoaded', function() {
@@ -890,6 +1311,17 @@
             if (appState.templates.length === 0) {
                 initializeDefaultTemplates();
             }
+
+            // Initialize keyboard shortcuts
+            initKeyboardShortcuts();
+
+            // Initialize character counter
+            const promptInput = document.getElementById('promptInput');
+            promptInput.addEventListener('input', updateCharCount);
+            updateCharCount();
+
+            // Check online status
+            updateOnlineStatus();
 
             // Render initial views
             renderTemplates();
@@ -915,11 +1347,75 @@
         }
 
         // ==================== GEMINI API INTEGRATION ====================
-        async function callGeminiAPI(prompt, systemInstruction = '') {
+
+        // Check cache for existing response
+        function getCachedResponse(cacheKey) {
+            if (appState.apiCache.has(cacheKey)) {
+                const cached = appState.apiCache.get(cacheKey);
+                const now = Date.now();
+                if (now - cached.timestamp < CONFIG.CACHE_DURATION) {
+                    return cached.data;
+                } else {
+                    appState.apiCache.delete(cacheKey);
+                }
+            }
+            return null;
+        }
+
+        // Store response in cache
+        function cacheResponse(cacheKey, data) {
+            appState.apiCache.set(cacheKey, {
+                data: data,
+                timestamp: Date.now()
+            });
+
+            // Limit cache size
+            if (appState.apiCache.size > CONFIG.CACHE_SIZE) {
+                const firstKey = appState.apiCache.keys().next().value;
+                appState.apiCache.delete(firstKey);
+            }
+        }
+
+        // Get user-friendly error message
+        function getErrorMessage(error) {
+            const message = error.message.toLowerCase();
+
+            if (message.includes('api key')) {
+                return 'Invalid API key. Please check your settings.';
+            } else if (message.includes('quota')) {
+                return 'API quota exceeded. Please try again later.';
+            } else if (message.includes('network') || message.includes('fetch')) {
+                return 'Network error. Please check your connection.';
+            } else if (message.includes('timeout')) {
+                return 'Request timed out. Please try again.';
+            } else if (message.includes('rate limit')) {
+                return 'Rate limit exceeded. Please wait a moment.';
+            } else {
+                return `API Error: ${error.message}`;
+            }
+        }
+
+        async function callGeminiAPI(prompt, systemInstruction = '', useCache = true) {
+            // Check if online
+            if (!navigator.onLine) {
+                showToast('Offline', 'You are currently offline', 'error');
+                return null;
+            }
+
+            // Check API key
             if (!appState.apiKey) {
-                alert('Please set your Gemini API key in Settings first.');
+                showToast('API Key Required', 'Please set your Gemini API key in Settings', 'warning');
                 openSettingsModal();
                 return null;
+            }
+
+            // Check cache
+            const cacheKey = `${prompt}-${systemInstruction}-${appState.geminiModel}`;
+            if (useCache) {
+                const cached = getCachedResponse(cacheKey);
+                if (cached) {
+                    return cached;
+                }
             }
 
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${appState.geminiModel}:generateContent?key=${appState.apiKey}`;
@@ -938,27 +1434,58 @@
                 }
             };
 
-            try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(requestBody)
-                });
+            // Retry logic with exponential backoff
+            for (let attempt = 0; attempt < CONFIG.RETRY_ATTEMPTS; attempt++) {
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), CONFIG.API_TIMEOUT);
 
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.error?.message || 'API request failed');
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(requestBody),
+                        signal: controller.signal
+                    });
+
+                    clearTimeout(timeoutId);
+
+                    if (!response.ok) {
+                        const error = await response.json();
+                        throw new Error(error.error?.message || 'API request failed');
+                    }
+
+                    const data = await response.json();
+                    const result = data.candidates[0].content.parts[0].text;
+
+                    // Cache the successful response
+                    cacheResponse(cacheKey, result);
+
+                    return result;
+                } catch (error) {
+                    console.error(`Gemini API Error (Attempt ${attempt + 1}/${CONFIG.RETRY_ATTEMPTS}):`, error);
+
+                    // If it's the last attempt, show error
+                    if (attempt === CONFIG.RETRY_ATTEMPTS - 1) {
+                        showToast('API Error', getErrorMessage(error), 'error');
+                        return null;
+                    }
+
+                    // If it's a network error, retry
+                    if (error.name === 'AbortError' || error.message.includes('fetch')) {
+                        const delay = CONFIG.RETRY_DELAY_BASE * Math.pow(2, attempt);
+                        showToast('Retrying', `Attempt ${attempt + 2}/${CONFIG.RETRY_ATTEMPTS} in ${delay/1000}s...`, 'warning');
+                        await sleep(delay);
+                    } else {
+                        // For non-network errors, don't retry
+                        showToast('API Error', getErrorMessage(error), 'error');
+                        return null;
+                    }
                 }
-
-                const data = await response.json();
-                return data.candidates[0].content.parts[0].text;
-            } catch (error) {
-                console.error('Gemini API Error:', error);
-                alert(`API Error: ${error.message}`);
-                return null;
             }
+
+            return null;
         }
 
         // ==================== PROMPT EVALUATION ====================
@@ -967,9 +1494,13 @@
             const targetModel = document.getElementById('targetModel').value;
 
             if (!promptText) {
-                alert('Please enter a prompt to evaluate.');
+                showToast('Missing Input', 'Please enter a prompt to evaluate', 'warning');
                 return;
             }
+
+            // Get button and set loading state
+            const button = event ? event.target.closest('button') : document.querySelector('button[onclick="evaluatePrompt()"]');
+            if (button) setButtonLoading(button, true);
 
             // Show loading state
             const resultsContainer = document.getElementById('evaluationResults');
@@ -1003,6 +1534,9 @@ Consider:
 
             const response = await callGeminiAPI(promptText, systemInstruction);
 
+            // Remove loading state
+            if (button) setButtonLoading(button, false);
+
             if (response) {
                 try {
                     // Extract JSON from response
@@ -1014,14 +1548,27 @@ Consider:
 
                     // Save to history
                     saveToHistory(promptText, targetModel, evaluation);
+
+                    showToast('Success', 'Prompt evaluated successfully', 'success');
                 } catch (error) {
                     console.error('Parse error:', error);
                     resultsContainer.innerHTML = `
-                        <div class="alert alert-danger">
-                            Failed to parse evaluation results. Please try again.
+                        <div class="text-center text-muted py-5">
+                            <i data-lucide="alert-circle" style="width: 48px; height: 48px; margin-bottom: 1rem;"></i>
+                            <p>Failed to parse evaluation results. Please try again.</p>
                         </div>
                     `;
+                    showToast('Parse Error', 'Failed to parse evaluation results', 'error');
+                    lucide.createIcons();
                 }
+            } else {
+                resultsContainer.innerHTML = `
+                    <div class="text-center text-muted py-5">
+                        <i data-lucide="info" style="width: 48px; height: 48px; margin-bottom: 1rem;"></i>
+                        <p>Enter a prompt and click "Evaluate Prompt" to see results.</p>
+                    </div>
+                `;
+                lucide.createIcons();
             }
         }
 
@@ -1076,9 +1623,13 @@ Consider:
             const targetModel = document.getElementById('targetModel').value;
 
             if (!promptText) {
-                alert('Please enter a prompt to improve.');
+                showToast('Missing Input', 'Please enter a prompt to improve', 'warning');
                 return;
             }
+
+            // Get button and set loading state
+            const button = event ? event.target.closest('button') : document.querySelectorAll('button[onclick="improvePrompt()"]')[0];
+            if (button) setButtonLoading(button, true);
 
             // Show loading
             const improvementSection = document.getElementById('improvementSection');
@@ -1102,6 +1653,9 @@ Make the prompt:
 
             const response = await callGeminiAPI(promptText, systemInstruction);
 
+            // Remove loading state
+            if (button) setButtonLoading(button, false);
+
             if (response) {
                 try {
                     const jsonMatch = response.match(/\{[\s\S]*\}/);
@@ -1112,13 +1666,18 @@ Make the prompt:
 
                     appState.lastImprovedPrompt = improvement.improved_prompt;
 
+                    showToast('Success', 'Prompt improved successfully', 'success');
+
                     // Scroll to improvement section
                     improvementSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     lucide.createIcons();
                 } catch (error) {
                     console.error('Parse error:', error);
                     document.getElementById('improvedPrompt').innerHTML = '<div class="text-danger">Failed to generate improvement. Please try again.</div>';
+                    showToast('Parse Error', 'Failed to generate improvement', 'error');
                 }
+            } else {
+                improvementSection.style.display = 'none';
             }
         }
 
@@ -1139,35 +1698,35 @@ Make the prompt:
         function initializeDefaultTemplates() {
             const defaultTemplates = [
                 {
-                    id: Date.now() + 1,
+                    id: generateId(),
                     name: 'Blog Post Generator',
                     category: 'Creative',
                     description: 'Generate engaging blog posts on any topic',
                     content: 'Write a comprehensive blog post about [Topic]. The tone should be [Tone:Professional|Casual|Humorous]. Include [Sections:3|5|7] main sections and format the output as [Format:Markdown|HTML].'
                 },
                 {
-                    id: Date.now() + 2,
+                    id: generateId(),
                     name: 'Code Review Assistant',
                     category: 'Coding',
                     description: 'Get detailed code review feedback',
                     content: 'Review the following [Language:Python|JavaScript|Java|C++] code. Focus on [Aspect:Performance|Security|Readability|Best Practices]. Provide specific suggestions for improvement.\n\nCode:\n[Code]'
                 },
                 {
-                    id: Date.now() + 3,
+                    id: generateId(),
                     name: 'Business Email Writer',
                     category: 'Business',
                     description: 'Craft professional business emails',
                     content: 'Write a professional email to [Recipient] regarding [Subject]. The tone should be [Tone:Formal|Semi-formal|Friendly]. The email should [Action:Request|Inform|Propose|Follow-up].'
                 },
                 {
-                    id: Date.now() + 4,
+                    id: generateId(),
                     name: 'Data Analysis Guide',
                     category: 'Data',
                     description: 'Get help analyzing datasets',
                     content: 'I have a dataset about [Dataset Description]. I want to [Goal:Find patterns|Predict outcomes|Identify correlations|Summarize insights]. The data includes [Variables]. Please suggest appropriate analysis methods and visualizations.'
                 },
                 {
-                    id: Date.now() + 5,
+                    id: generateId(),
                     name: 'Learning Curriculum',
                     category: 'Education',
                     description: 'Create personalized learning paths',
@@ -1306,10 +1865,13 @@ Make the prompt:
             // Set initial preview
             updateTemplatePreview();
 
+            // Create debounced preview function
+            const debouncedPreview = debounce(updateTemplatePreview, CONFIG.DEBOUNCE_DELAY);
+
             // Add event listeners
             document.querySelectorAll('.template-var-input').forEach(input => {
-                input.addEventListener('input', updateTemplatePreview);
-                input.addEventListener('change', updateTemplatePreview);
+                input.addEventListener('input', debouncedPreview);
+                input.addEventListener('change', updateTemplatePreview); // Immediate update on change
             });
 
             // Show modal
@@ -1347,11 +1909,14 @@ Make the prompt:
             if (!appState.currentTemplate) return;
 
             if (confirm(`Are you sure you want to delete "${appState.currentTemplate.name}"?`)) {
+                const templateName = appState.currentTemplate.name;
                 appState.templates = appState.templates.filter(t => t.id !== appState.currentTemplate.id);
                 localStorage.setItem('templates', JSON.stringify(appState.templates));
 
                 bootstrap.Modal.getInstance(document.getElementById('useTemplateModal')).hide();
                 renderTemplates();
+
+                showToast('Deleted', `Template "${templateName}" deleted successfully`, 'success');
             }
         }
 
@@ -1374,12 +1939,12 @@ Make the prompt:
             const category = document.getElementById('templateCategory').value;
 
             if (!name || !content) {
-                alert('Please fill in at least the name and content fields.');
+                showToast('Missing Fields', 'Please fill in at least the name and content fields', 'warning');
                 return;
             }
 
             const template = {
-                id: Date.now(),
+                id: generateId(),
                 name,
                 category,
                 description: description || 'Custom template',
@@ -1392,12 +1957,14 @@ Make the prompt:
             bootstrap.Modal.getInstance(document.getElementById('createTemplateModal')).hide();
             showSection('templates');
             renderTemplates();
+
+            showToast('Success', `Template "${name}" created successfully`, 'success');
         }
 
         // ==================== HISTORY ====================
         function saveToHistory(prompt, targetModel, evaluation) {
             const historyItem = {
-                id: Date.now(),
+                id: generateId(),
                 timestamp: new Date().toISOString(),
                 prompt: prompt,
                 targetModel: targetModel,
@@ -1407,9 +1974,9 @@ Make the prompt:
 
             appState.history.unshift(historyItem);
 
-            // Keep only last 50 items
-            if (appState.history.length > 50) {
-                appState.history = appState.history.slice(0, 50);
+            // Keep only last MAX_HISTORY_ITEMS items
+            if (appState.history.length > CONFIG.MAX_HISTORY_ITEMS) {
+                appState.history = appState.history.slice(0, CONFIG.MAX_HISTORY_ITEMS);
             }
 
             localStorage.setItem('history', JSON.stringify(appState.history));
@@ -1470,13 +2037,14 @@ Make the prompt:
                 appState.history = [];
                 localStorage.setItem('history', JSON.stringify(appState.history));
                 renderHistory();
+                showToast('Cleared', 'History cleared successfully', 'success');
             }
         }
 
         // ==================== EXPORT ====================
         function exportHistory(format) {
             if (appState.history.length === 0) {
-                alert('No history to export.');
+                showToast('No Data', 'No history to export', 'warning');
                 return;
             }
 
@@ -1522,6 +2090,8 @@ Make the prompt:
             a.download = `promptos-history-${Date.now()}.md`;
             a.click();
             URL.revokeObjectURL(url);
+
+            showToast('Exported', 'History exported as Markdown', 'success');
         }
 
         function exportAsPDF() {
@@ -1578,6 +2148,7 @@ Make the prompt:
             });
 
             doc.save(`promptos-history-${Date.now()}.pdf`);
+            showToast('Exported', 'History exported as PDF', 'success');
         }
 
         // ==================== SETTINGS ====================
@@ -1591,18 +2162,19 @@ Make the prompt:
             const geminiModel = document.getElementById('geminiModel').value;
 
             if (!apiKey) {
-                alert('Please enter an API key.');
+                showToast('Missing API Key', 'Please enter an API key', 'warning');
                 return;
             }
 
             appState.apiKey = apiKey;
             appState.geminiModel = geminiModel;
 
-            localStorage.setItem('gemini_api_key', apiKey);
+            // Obfuscate API key before storing
+            localStorage.setItem('gemini_api_key', obfuscateKey(apiKey));
             localStorage.setItem('gemini_model', geminiModel);
 
             bootstrap.Modal.getInstance(document.getElementById('settingsModal')).hide();
-            alert('Settings saved successfully!');
+            showToast('Saved', 'Settings saved successfully', 'success');
         }
 
         function changeTheme() {
