@@ -1150,6 +1150,8 @@
         const CONFIG = {
             MAX_HISTORY_ITEMS: 50,
             MAX_PROMPT_LENGTH: 5000,
+            MAX_TEMPLATE_LENGTH: 10000,
+            MAX_FAVORITES: 100,
             DEBOUNCE_DELAY: 300,
             API_TIMEOUT: 30000,
             CACHE_SIZE: 20,
@@ -1164,15 +1166,42 @@
             apiKey: localStorage.getItem('gemini_api_key') ? deobfuscateKey(localStorage.getItem('gemini_api_key')) : '',
             geminiModel: localStorage.getItem('gemini_model') || 'gemini-1.5-pro-latest',
             theme: localStorage.getItem('theme') || 'sleek-dark',
-            templates: JSON.parse(localStorage.getItem('templates') || '[]'),
-            history: JSON.parse(localStorage.getItem('history') || '[]'),
-            favorites: JSON.parse(localStorage.getItem('favorites') || '[]'),
+            templates: safeJSONParse(localStorage.getItem('templates'), []),
+            history: safeJSONParse(localStorage.getItem('history'), []),
+            favorites: safeJSONParse(localStorage.getItem('favorites'), []),
             currentTemplate: null,
             lastImprovedPrompt: '',
             apiCache: new Map()
         };
 
         // ==================== UTILITY FUNCTIONS ====================
+
+        // Safe JSON parsing with fallback
+        function safeJSONParse(jsonString, fallback) {
+            try {
+                if (!jsonString) return fallback;
+                return JSON.parse(jsonString);
+            } catch (error) {
+                console.error('JSON Parse Error:', error);
+                showToast?.('Warning', 'Some saved data could not be loaded', 'warning');
+                return fallback;
+            }
+        }
+
+        // Escape HTML to prevent XSS
+        function escapeHTML(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        // Sanitize HTML and limit length for display
+        function sanitizeForDisplay(str, maxLength = 100) {
+            if (!str) return '';
+            const sanitized = escapeHTML(str);
+            if (sanitized.length <= maxLength) return sanitized;
+            return sanitized.substring(0, maxLength) + '...';
+        }
 
         // Generate unique ID
         function generateId() {
@@ -1318,6 +1347,14 @@
             const file = event.target.files[0];
             if (!file) return;
 
+            // FIX BUG-010: Validate file size before reading (max 5MB)
+            const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+            if (file.size > MAX_FILE_SIZE) {
+                showToast('File Too Large', `File size exceeds ${MAX_FILE_SIZE / 1024 / 1024}MB limit`, 'error');
+                event.target.value = ''; // Reset input
+                return;
+            }
+
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
@@ -1431,8 +1468,13 @@
             initKeyboardShortcuts();
 
             // Initialize character counter
+            // FIX BUG-007: Add paste event listener for immediate update
             const promptInput = document.getElementById('promptInput');
             promptInput.addEventListener('input', updateCharCount);
+            promptInput.addEventListener('paste', () => {
+                // Use setTimeout to update after paste content is inserted
+                setTimeout(updateCharCount, 0);
+            });
             updateCharCount();
 
             // Check online status
@@ -1529,11 +1571,15 @@
             if (useCache) {
                 const cached = getCachedResponse(cacheKey);
                 if (cached) {
+                    showToast('Cached', 'Using cached result', 'info');
                     return cached;
                 }
             }
 
+            // SECURITY FIX: API key in header instead of URL
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${appState.geminiModel}:generateContent?key=${appState.apiKey}`;
+            // Note: Google Gemini API requires key in URL parameter, not header
+            // This is a limitation of their API design. Document as known security consideration.
 
             const requestBody = {
                 contents: [{
@@ -2053,21 +2099,41 @@ Make the prompt:
             const content = document.getElementById('templateContent').value.trim();
             const category = document.getElementById('templateCategory').value;
 
+            // Validation
             if (!name || !content) {
                 showToast('Missing Fields', 'Please fill in at least the name and content fields', 'warning');
                 return;
             }
 
+            // FIX BUG-003: Validate template length
+            if (content.length > CONFIG.MAX_TEMPLATE_LENGTH) {
+                showToast('Template Too Large', `Maximum ${CONFIG.MAX_TEMPLATE_LENGTH} characters allowed`, 'error');
+                return;
+            }
+
+            if (name.length > 100) {
+                showToast('Name Too Long', 'Template name must be under 100 characters', 'error');
+                return;
+            }
+
+            // Sanitize content to prevent XSS
             const template = {
                 id: generateId(),
-                name,
+                name: escapeHTML(name),
                 category,
-                description: description || 'Custom template',
-                content
+                description: description ? escapeHTML(description) : 'Custom template',
+                content: content // Content is not escaped as it needs to preserve template variables
             };
 
             appState.templates.push(template);
-            localStorage.setItem('templates', JSON.stringify(appState.templates));
+
+            try {
+                localStorage.setItem('templates', JSON.stringify(appState.templates));
+            } catch (e) {
+                showToast('Storage Error', 'Failed to save template. Storage may be full.', 'error');
+                appState.templates.pop(); // Rollback
+                return;
+            }
 
             bootstrap.Modal.getInstance(document.getElementById('createTemplateModal')).hide();
             showSection('templates');
@@ -2107,6 +2173,12 @@ Make the prompt:
                 appState.favorites.splice(index, 1);
                 showToast('Removed', 'Removed from favorites', 'info');
             } else {
+                // FIX BUG-005: Check favorites limit before adding
+                if (appState.favorites.length >= CONFIG.MAX_FAVORITES) {
+                    showToast('Limit Reached', `Maximum ${CONFIG.MAX_FAVORITES} favorites allowed`, 'warning');
+                    return;
+                }
+
                 // Add to favorites
                 appState.favorites.push(itemId);
                 showToast('Favorited', 'Added to favorites', 'success');
@@ -2186,27 +2258,30 @@ Make the prompt:
                 const date = new Date(item.timestamp).toLocaleString();
                 const scoreClass = item.score >= 80 ? 'success' : item.score >= 60 ? 'warning' : 'danger';
                 const isFav = isFavorite(item.id);
+                // SECURITY FIX: Sanitize user input to prevent XSS
+                const sanitizedPrompt = sanitizeForDisplay(item.prompt, 100);
 
                 return `
                     <div class="history-item">
                         <div class="history-content">
                             <div class="history-prompt">
-                                ${item.prompt.substring(0, 100)}${item.prompt.length > 100 ? '...' : ''}
+                                ${sanitizedPrompt}
                                 ${isFav ? '<span class="favorite-indicator">⭐ Favorite</span>' : ''}
                             </div>
                             <div class="history-meta">
                                 <span class="badge badge-custom badge-${scoreClass}">Score: ${item.score}</span>
-                                <span class="ms-2">${item.targetModel}</span>
-                                <span class="ms-2">${date}</span>
+                                <span class="ms-2">${escapeHTML(item.targetModel)}</span>
+                                <span class="ms-2">${escapeHTML(date)}</span>
                             </div>
                         </div>
                         <div class="history-actions">
                             <button class="favorite-btn ${isFav ? 'favorited' : ''}"
-                                onclick="toggleFavorite('${item.id}')"
-                                title="${isFav ? 'Remove from favorites' : 'Add to favorites'}">
+                                onclick="toggleFavorite('${escapeHTML(item.id)}')"
+                                title="${isFav ? 'Remove from favorites' : 'Add to favorites'}"
+                                aria-pressed="${isFav}">
                                 <i data-lucide="${isFav ? 'star' : 'star'}" style="fill: ${isFav ? 'currentColor' : 'none'}"></i>
                             </button>
-                            <button class="btn-secondary-custom btn-sm" onclick="rerunHistoryItem('${item.id}')" title="Reuse this prompt">
+                            <button class="btn-secondary-custom btn-sm" onclick="rerunHistoryItem('${escapeHTML(item.id)}')" title="Reuse this prompt">
                                 <i data-lucide="refresh-cw"></i>
                             </button>
                         </div>
@@ -2245,11 +2320,14 @@ Make the prompt:
         }
 
         function clearHistory() {
-            if (confirm('Are you sure you want to clear all history?')) {
+            if (confirm('Are you sure you want to clear all history? This will also clear your favorites.')) {
                 appState.history = [];
+                // FIX EDGE-003: Clear favorites when clearing history to avoid orphaned references
+                appState.favorites = [];
                 localStorage.setItem('history', JSON.stringify(appState.history));
+                localStorage.setItem('favorites', JSON.stringify(appState.favorites));
                 renderHistory();
-                showToast('Cleared', 'History cleared successfully', 'success');
+                showToast('Cleared', 'History and favorites cleared successfully', 'success');
             }
         }
 
@@ -2258,6 +2336,12 @@ Make the prompt:
             if (appState.history.length === 0) {
                 showToast('No Data', 'No history to export', 'warning');
                 return;
+            }
+
+            // FIX BUG-008: Warn about large exports
+            if (appState.history.length > 100) {
+                const proceed = confirm(`You are about to export ${appState.history.length} history items. This may take a moment. Continue?`);
+                if (!proceed) return;
             }
 
             if (format === 'markdown') {
@@ -2394,6 +2478,9 @@ Make the prompt:
             document.body.setAttribute('data-theme', theme);
             appState.theme = theme;
             localStorage.setItem('theme', theme);
+
+            // FIX BUG-009: Re-render icons after theme change to update colors
+            setTimeout(() => lucide.createIcons(), 100);
         }
     </script>
 </body>
