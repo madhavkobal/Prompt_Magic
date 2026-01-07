@@ -172,6 +172,65 @@
             animation: spin 0.8s linear infinite;
         }
 
+        /* ==================== FAVORITES ==================== */
+        .favorite-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+            transition: all var(--transition-speed);
+            color: var(--text-muted);
+        }
+
+        .favorite-btn:hover {
+            color: var(--accent-warning);
+            transform: scale(1.1);
+        }
+
+        .favorite-btn.favorited {
+            color: var(--accent-warning);
+        }
+
+        .favorite-indicator {
+            display: inline-block;
+            background: var(--accent-warning);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            margin-left: 0.5rem;
+        }
+
+        /* ==================== SEARCH & FILTER ==================== */
+        .filter-controls {
+            background: var(--bg-tertiary);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 1rem;
+            align-items: end;
+        }
+
+        @media (max-width: 768px) {
+            .filter-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .filter-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .clear-filters-btn {
+            align-self: flex-end;
+        }
+
         /* Sleek Dark Theme (Default) */
         [data-theme="sleek-dark"] {
             --bg-primary: #0a0e27;
@@ -898,6 +957,49 @@
                 </div>
             </div>
 
+            <!-- Search & Filter Controls -->
+            <div class="filter-controls">
+                <div class="filter-row">
+                    <div class="filter-item">
+                        <label class="form-label-custom">Search</label>
+                        <input type="text" id="historySearch" class="form-control-custom"
+                            placeholder="Search prompts..." onkeyup="filterHistory()">
+                    </div>
+                    <div class="filter-item">
+                        <label class="form-label-custom">Model</label>
+                        <select id="historyModelFilter" class="form-control-custom form-select" onchange="filterHistory()">
+                            <option value="">All Models</option>
+                            <option value="ChatGPT">ChatGPT</option>
+                            <option value="Claude">Claude</option>
+                            <option value="Gemini">Gemini</option>
+                            <option value="DeepSeek">DeepSeek</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <label class="form-label-custom">Score</label>
+                        <select id="historyScoreFilter" class="form-control-custom form-select" onchange="filterHistory()">
+                            <option value="">All Scores</option>
+                            <option value="80-100">Excellent (80-100)</option>
+                            <option value="60-79">Good (60-79)</option>
+                            <option value="0-59">Needs Work (0-59)</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <label class="form-label-custom">Show</label>
+                        <select id="historyFavoriteFilter" class="form-control-custom form-select" onchange="filterHistory()">
+                            <option value="">All Items</option>
+                            <option value="favorites">⭐ Favorites Only</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-3 d-flex justify-content-between align-items-center">
+                    <small class="text-muted" id="historyCount">Showing 0 of 0 items</small>
+                    <button class="btn-secondary-custom btn-sm" onclick="clearFilters()">
+                        <i data-lucide="x"></i> Clear Filters
+                    </button>
+                </div>
+            </div>
+
             <div id="historyContainer">
                 <!-- History items will be dynamically inserted here -->
             </div>
@@ -1064,6 +1166,7 @@
             theme: localStorage.getItem('theme') || 'sleek-dark',
             templates: JSON.parse(localStorage.getItem('templates') || '[]'),
             history: JSON.parse(localStorage.getItem('history') || '[]'),
+            favorites: JSON.parse(localStorage.getItem('favorites') || '[]'),
             currentTemplate: null,
             lastImprovedPrompt: '',
             apiCache: new Map()
@@ -1185,10 +1288,11 @@
 
         function exportAllData() {
             const data = {
-                version: '1.0',
+                version: '1.1',
                 exportDate: new Date().toISOString(),
                 templates: appState.templates,
                 history: appState.history,
+                favorites: appState.favorites,
                 settings: {
                     theme: appState.theme,
                     geminiModel: appState.geminiModel
@@ -1227,6 +1331,7 @@
                     // Restore data
                     appState.templates = data.templates;
                     appState.history = data.history;
+                    appState.favorites = data.favorites || []; // Support old backups without favorites
 
                     if (data.settings) {
                         appState.theme = data.settings.theme || appState.theme;
@@ -1236,6 +1341,7 @@
                     // Save to localStorage
                     localStorage.setItem('templates', JSON.stringify(appState.templates));
                     localStorage.setItem('history', JSON.stringify(appState.history));
+                    localStorage.setItem('favorites', JSON.stringify(appState.favorites));
                     localStorage.setItem('theme', appState.theme);
                     localStorage.setItem('gemini_model', appState.geminiModel);
 
@@ -1275,6 +1381,15 @@
                 if ((e.ctrlKey || e.metaKey) && e.key === '/') {
                     e.preventDefault();
                     openSettingsModal();
+                }
+
+                // Ctrl+F or Cmd+F to focus search (when in history section)
+                if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                    const historySection = document.getElementById('history-section');
+                    if (historySection && historySection.style.display !== 'none') {
+                        e.preventDefault();
+                        document.getElementById('historySearch')?.focus();
+                    }
                 }
             });
         }
@@ -1982,28 +2097,103 @@ Make the prompt:
             localStorage.setItem('history', JSON.stringify(appState.history));
         }
 
-        function renderHistory() {
-            const container = document.getElementById('historyContainer');
+        // ==================== FAVORITES ====================
 
-            if (appState.history.length === 0) {
+        function toggleFavorite(itemId) {
+            const index = appState.favorites.indexOf(itemId);
+
+            if (index > -1) {
+                // Remove from favorites
+                appState.favorites.splice(index, 1);
+                showToast('Removed', 'Removed from favorites', 'info');
+            } else {
+                // Add to favorites
+                appState.favorites.push(itemId);
+                showToast('Favorited', 'Added to favorites', 'success');
+            }
+
+            localStorage.setItem('favorites', JSON.stringify(appState.favorites));
+            filterHistory(); // Re-render with current filters
+        }
+
+        function isFavorite(itemId) {
+            return appState.favorites.includes(itemId);
+        }
+
+        // ==================== SEARCH & FILTER ====================
+
+        function filterHistory() {
+            const searchTerm = document.getElementById('historySearch')?.value.toLowerCase() || '';
+            const modelFilter = document.getElementById('historyModelFilter')?.value || '';
+            const scoreFilter = document.getElementById('historyScoreFilter')?.value || '';
+            const favoriteFilter = document.getElementById('historyFavoriteFilter')?.value || '';
+
+            let filtered = appState.history;
+
+            // Search filter
+            if (searchTerm) {
+                filtered = filtered.filter(item =>
+                    item.prompt.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            // Model filter
+            if (modelFilter) {
+                filtered = filtered.filter(item => item.targetModel === modelFilter);
+            }
+
+            // Score filter
+            if (scoreFilter) {
+                const [min, max] = scoreFilter.split('-').map(Number);
+                filtered = filtered.filter(item => item.score >= min && item.score <= max);
+            }
+
+            // Favorite filter
+            if (favoriteFilter === 'favorites') {
+                filtered = filtered.filter(item => isFavorite(item.id));
+            }
+
+            renderFilteredHistory(filtered);
+        }
+
+        function clearFilters() {
+            document.getElementById('historySearch').value = '';
+            document.getElementById('historyModelFilter').value = '';
+            document.getElementById('historyScoreFilter').value = '';
+            document.getElementById('historyFavoriteFilter').value = '';
+            filterHistory();
+        }
+
+        function renderFilteredHistory(filtered) {
+            const container = document.getElementById('historyContainer');
+            const countElement = document.getElementById('historyCount');
+
+            // Update count
+            countElement.textContent = `Showing ${filtered.length} of ${appState.history.length} items`;
+
+            if (filtered.length === 0) {
                 container.innerHTML = `
                     <div class="text-center text-muted py-5">
                         <i data-lucide="inbox" style="width: 48px; height: 48px; margin-bottom: 1rem;"></i>
-                        <p>No evaluation history yet.</p>
+                        <p>No matching items found.</p>
                     </div>
                 `;
                 lucide.createIcons();
                 return;
             }
 
-            container.innerHTML = appState.history.map(item => {
+            container.innerHTML = filtered.map(item => {
                 const date = new Date(item.timestamp).toLocaleString();
                 const scoreClass = item.score >= 80 ? 'success' : item.score >= 60 ? 'warning' : 'danger';
+                const isFav = isFavorite(item.id);
 
                 return `
                     <div class="history-item">
                         <div class="history-content">
-                            <div class="history-prompt">${item.prompt.substring(0, 100)}${item.prompt.length > 100 ? '...' : ''}</div>
+                            <div class="history-prompt">
+                                ${item.prompt.substring(0, 100)}${item.prompt.length > 100 ? '...' : ''}
+                                ${isFav ? '<span class="favorite-indicator">⭐ Favorite</span>' : ''}
+                            </div>
                             <div class="history-meta">
                                 <span class="badge badge-custom badge-${scoreClass}">Score: ${item.score}</span>
                                 <span class="ms-2">${item.targetModel}</span>
@@ -2011,7 +2201,12 @@ Make the prompt:
                             </div>
                         </div>
                         <div class="history-actions">
-                            <button class="btn-secondary-custom btn-sm" onclick="rerunHistoryItem(${item.id})" title="Reuse this prompt">
+                            <button class="favorite-btn ${isFav ? 'favorited' : ''}"
+                                onclick="toggleFavorite('${item.id}')"
+                                title="${isFav ? 'Remove from favorites' : 'Add to favorites'}">
+                                <i data-lucide="${isFav ? 'star' : 'star'}" style="fill: ${isFav ? 'currentColor' : 'none'}"></i>
+                            </button>
+                            <button class="btn-secondary-custom btn-sm" onclick="rerunHistoryItem('${item.id}')" title="Reuse this prompt">
                                 <i data-lucide="refresh-cw"></i>
                             </button>
                         </div>
@@ -2022,8 +2217,25 @@ Make the prompt:
             lucide.createIcons();
         }
 
+        function renderHistory() {
+            if (appState.history.length === 0) {
+                const container = document.getElementById('historyContainer');
+                container.innerHTML = `
+                    <div class="text-center text-muted py-5">
+                        <i data-lucide="inbox" style="width: 48px; height: 48px; margin-bottom: 1rem;"></i>
+                        <p>No evaluation history yet.</p>
+                    </div>
+                `;
+                document.getElementById('historyCount').textContent = 'Showing 0 of 0 items';
+                lucide.createIcons();
+                return;
+            }
+
+            filterHistory(); // Use filter function to render all items
+        }
+
         function rerunHistoryItem(id) {
-            const item = appState.history.find(h => h.id === id);
+            const item = appState.history.find(h => h.id == id); // Use == for flexible comparison
             if (item) {
                 document.getElementById('promptInput').value = item.prompt;
                 document.getElementById('targetModel').value = item.targetModel;
