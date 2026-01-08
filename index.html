@@ -1223,12 +1223,13 @@
                     <div class="mb-4">
                         <label class="form-label-custom">Gemini Model</label>
                         <select id="geminiModel" class="form-control-custom form-select">
-                            <option value="gemini-2.0-flash-exp">Gemini 2.0 Flash (Experimental)</option>
-                            <option value="gemini-exp-1206">Gemini Experimental 1206</option>
-                            <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
-                            <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+                            <option value="gemini-3-flash-preview">Gemini 3 Flash (Preview)</option>
+                            <option value="gemini-3-pro-preview">Gemini 3 Pro (Preview)</option>
+                            <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                            <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+                            <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
                         </select>
-                        <small class="text-muted">Note: Gemini 3.0 models are not yet available. Using latest available models.</small>
+                        <small class="text-muted">Gemini 3 models feature adaptive thinking and 1M token context. <a href="https://ai.google.dev/gemini-api/docs/models" target="_blank">View all models</a></small>
                     </div>
 
                     <div class="mb-4">
@@ -1387,7 +1388,7 @@
         // ==================== STATE MANAGEMENT ====================
         let appState = {
             apiKey: localStorage.getItem('gemini_api_key') ? deobfuscateKey(localStorage.getItem('gemini_api_key')) : '',
-            geminiModel: localStorage.getItem('gemini_model') || 'gemini-2.0-flash-exp',
+            geminiModel: localStorage.getItem('gemini_model') || 'gemini-3-flash-preview',
             theme: localStorage.getItem('theme') || 'sleek-dark',
             templates: safeJSONParse(localStorage.getItem('templates'), []),
             history: safeJSONParse(localStorage.getItem('history'), []),
