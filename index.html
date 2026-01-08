@@ -1229,8 +1229,9 @@
                     <div class="mb-4">
                         <label class="form-label-custom">Gemini Model</label>
                         <select id="geminiModel" class="form-control-custom form-select">
-                            <option value="gemini-1.5-pro-latest">Gemini 1.5 Pro</option>
-                            <option value="gemini-1.5-flash-latest">Gemini 1.5 Flash</option>
+                            <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                            <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+                            <option value="gemini-pro">Gemini Pro</option>
                         </select>
                     </div>
 
@@ -1390,7 +1391,7 @@
         // ==================== STATE MANAGEMENT ====================
         let appState = {
             apiKey: localStorage.getItem('gemini_api_key') ? deobfuscateKey(localStorage.getItem('gemini_api_key')) : '',
-            geminiModel: localStorage.getItem('gemini_model') || 'gemini-1.5-pro-latest',
+            geminiModel: localStorage.getItem('gemini_model') || 'gemini-1.5-pro',
             theme: localStorage.getItem('theme') || 'sleek-dark',
             templates: safeJSONParse(localStorage.getItem('templates'), []),
             history: safeJSONParse(localStorage.getItem('history'), []),
