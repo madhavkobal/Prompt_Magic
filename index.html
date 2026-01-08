@@ -452,12 +452,97 @@
 
         .nav-link {
             color: var(--text-secondary) !important;
-            transition: color var(--transition-speed);
+            transition: all var(--transition-speed);
             margin: 0 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .nav-link:hover {
             color: var(--accent-primary) !important;
+            background: rgba(0, 217, 255, 0.05);
+            transform: translateY(-1px);
+        }
+
+        /* Active navigation state */
+        .nav-link.active {
+            color: var(--accent-primary) !important;
+            background: rgba(0, 217, 255, 0.1);
+            font-weight: 600;
+            border-bottom: 3px solid var(--accent-primary);
+        }
+
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 6px;
+            height: 6px;
+            background: var(--accent-primary);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent-primary);
+        }
+
+        /* ==================== KEYBOARD FOCUS INDICATORS (WCAG 2.4.7) ==================== */
+        *:focus {
+            outline: 3px solid var(--accent-primary);
+            outline-offset: 2px;
+        }
+
+        *:focus:not(:focus-visible) {
+            outline: none;
+        }
+
+        *:focus-visible {
+            outline: 3px solid var(--accent-primary);
+            outline-offset: 2px;
+            box-shadow: 0 0 0 4px rgba(0, 217, 255, 0.2);
+            transition: box-shadow 0.2s ease;
+        }
+
+        .btn-primary-custom:focus-visible {
+            outline-color: var(--accent-warning);
+            box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.3);
+        }
+
+        /* ==================== SKIP TO CONTENT (WCAG 2.4.1) ==================== */
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+            padding: 8px 16px;
+            text-decoration: none;
+            border-radius: 0 0 8px 0;
+            z-index: 10000;
+            font-weight: 600;
+            transition: top 0.3s ease;
+        }
+
+        .skip-link:focus {
+            top: 0;
+            outline: 3px solid var(--accent-warning);
+            outline-offset: 2px;
+        }
+
+        /* Screen reader only text */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
         }
 
         /* ==================== CARDS ==================== */
@@ -511,20 +596,50 @@
         }
 
         /* ==================== BUTTONS ==================== */
+        /* ==================== BUTTON HIERARCHY ==================== */
         .btn-primary-custom {
             background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
             border: none;
             border-radius: 8px;
             color: white;
-            padding: 0.75rem 1.5rem;
+            padding: 0.875rem 1.75rem;
+            min-height: 44px;  /* WCAG touch target */
+            min-width: 44px;
             font-weight: 600;
-            transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+            font-size: 1rem;
+            transition: all var(--transition-speed);
             cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 14px rgba(0, 217, 255, 0.3);
+        }
+
+        .btn-primary-custom::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn-primary-custom:hover::before {
+            width: 300px;
+            height: 300px;
         }
 
         .btn-primary-custom:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 217, 255, 0.4);
+            box-shadow: 0 6px 20px rgba(0, 217, 255, 0.5);
+        }
+
+        .btn-primary-custom:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(0, 217, 255, 0.3);
         }
 
         .btn-secondary-custom {
@@ -533,14 +648,62 @@
             border-radius: 8px;
             color: var(--text-primary);
             padding: 0.75rem 1.5rem;
+            min-height: 44px;  /* WCAG touch target */
+            min-width: 44px;
             font-weight: 600;
+            font-size: 0.95rem;
             transition: all var(--transition-speed);
             cursor: pointer;
+            opacity: 0.95;
         }
 
         .btn-secondary-custom:hover {
             border-color: var(--accent-primary);
             background: var(--input-bg);
+            opacity: 1;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary-custom:active {
+            transform: translateY(0);
+        }
+
+        /* Tertiary button style */
+        .btn-tertiary-custom {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            padding: 0.5rem 1rem;
+            min-height: 44px;
+            font-size: 0.9rem;
+            transition: all var(--transition-speed);
+            cursor: pointer;
+        }
+
+        .btn-tertiary-custom:hover {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+            background: rgba(0, 217, 255, 0.05);
+        }
+
+        /* Danger button style */
+        .btn-danger-custom {
+            background: linear-gradient(135deg, var(--accent-danger), #ff6348);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            min-height: 44px;
+            font-weight: 600;
+            transition: all var(--transition-speed);
+            cursor: pointer;
+        }
+
+        .btn-danger-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 71, 87, 0.4);
         }
 
         .btn-icon {
@@ -549,13 +712,58 @@
             gap: 0.5rem;
         }
 
-        /* ==================== SCORE DISPLAY ==================== */
+        /* Button loading state */
+        .btn-loading {
+            position: relative;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .btn-loading::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 50%;
+            left: 50%;
+            margin-left: -8px;
+            margin-top: -8px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ==================== ENHANCED SCORE DISPLAY ==================== */
         .score-container {
             text-align: center;
             padding: 2rem;
             background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary));
             border-radius: var(--border-radius);
             margin: 1.5rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Score urgency overlay - shown for low scores */
+        .score-container.score-critical::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 71, 87, 0.15), transparent);
+            animation: alert-sweep 3s infinite;
+        }
+
+        @keyframes alert-sweep {
+            0% { left: -100%; }
+            100% { left: 100%; }
         }
 
         .score-circle {
@@ -574,6 +782,49 @@
             );
         }
 
+        /* Dynamic colors based on score */
+        .score-circle[data-score-level="critical"] {
+            background: conic-gradient(
+                var(--accent-danger) 0deg,
+                var(--accent-danger) calc(var(--score, 0) * 3.6deg),
+                var(--border-color) calc(var(--score, 0) * 3.6deg)
+            );
+            animation: pulse-danger 2s infinite;
+        }
+
+        .score-circle[data-score-level="poor"] {
+            background: conic-gradient(
+                var(--accent-warning) 0deg,
+                var(--accent-warning) calc(var(--score, 0) * 3.6deg),
+                var(--border-color) calc(var(--score, 0) * 3.6deg)
+            );
+        }
+
+        .score-circle[data-score-level="good"] {
+            background: conic-gradient(
+                var(--accent-primary) 0deg,
+                var(--accent-primary) calc(var(--score, 0) * 3.6deg),
+                var(--border-color) calc(var(--score, 0) * 3.6deg)
+            );
+        }
+
+        .score-circle[data-score-level="excellent"] {
+            background: conic-gradient(
+                var(--accent-success) 0deg,
+                var(--accent-success) calc(var(--score, 0) * 3.6deg),
+                var(--border-color) calc(var(--score, 0) * 3.6deg)
+            );
+        }
+
+        @keyframes pulse-danger {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7);
+            }
+            50% {
+                box-shadow: 0 0 0 20px rgba(255, 71, 87, 0);
+            }
+        }
+
         .score-circle::before {
             content: '';
             width: 130px;
@@ -586,14 +837,72 @@
         .score-value {
             font-size: 2.5rem;
             font-weight: 700;
-            color: var(--accent-primary);
             z-index: 1;
+        }
+
+        .score-value[data-score-level="critical"] {
+            color: var(--accent-danger);
+            animation: shake 0.5s;
+        }
+
+        .score-value[data-score-level="poor"] {
+            color: var(--accent-warning);
+        }
+
+        .score-value[data-score-level="good"] {
+            color: var(--accent-primary);
+        }
+
+        .score-value[data-score-level="excellent"] {
+            color: var(--accent-success);
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-3px); }
+            75% { transform: translateX(3px); }
         }
 
         .score-label {
             color: var(--text-secondary);
             font-size: 1.1rem;
             margin-top: 0.5rem;
+        }
+
+        /* Score status badge */
+        .score-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-top: 1rem;
+        }
+
+        .score-status.status-critical {
+            background: rgba(255, 71, 87, 0.15);
+            color: var(--accent-danger);
+            border: 2px solid var(--accent-danger);
+        }
+
+        .score-status.status-poor {
+            background: rgba(255, 215, 0, 0.15);
+            color: var(--accent-warning);
+            border: 2px solid var(--accent-warning);
+        }
+
+        .score-status.status-good {
+            background: rgba(0, 217, 255, 0.15);
+            color: var(--accent-primary);
+            border: 2px solid var(--accent-primary);
+        }
+
+        .score-status.status-excellent {
+            background: rgba(0, 255, 136, 0.15);
+            color: var(--accent-success);
+            border: 2px solid var(--accent-success);
         }
 
         /* ==================== FEEDBACK LIST ==================== */
@@ -870,13 +1179,16 @@
 </head>
 <body data-theme="sleek-dark">
 
+    <!-- ==================== SKIP TO CONTENT (WCAG 2.4.1) ==================== -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
     <!-- ==================== OFFLINE BANNER ==================== -->
     <div id="offlineBanner" class="offline-banner">
         <i data-lucide="wifi-off"></i> You are currently offline. Some features may not work.
     </div>
 
     <!-- ==================== TOAST CONTAINER ==================== -->
-    <div id="toastContainer" class="toast-container"></div>
+    <div id="toastContainer" class="toast-container" role="region" aria-live="polite" aria-label="Notifications"></div>
 
     <!-- ==================== NAVBAR ==================== -->
     <nav class="navbar navbar-expand-lg navbar-dark navbar-custom sticky-top">
@@ -919,7 +1231,7 @@
         </div>
     </nav>
 
-    <div class="container-main">
+    <div class="container-main" id="main-content">
 
         <!-- ==================== EVALUATE SECTION ==================== -->
         <div id="evaluate-section" class="section-content">
@@ -966,7 +1278,7 @@
                             <span><i data-lucide="bar-chart-2"></i> Evaluation Results</span>
                         </div>
                         <div class="card-body p-4">
-                            <div id="evaluationResults">
+                            <div id="evaluationResults" role="status" aria-live="polite" aria-atomic="true">
                                 <div class="text-center text-muted py-5">
                                     <i data-lucide="info" style="width: 48px; height: 48px; margin-bottom: 1rem;"></i>
                                     <p>Enter a prompt and click "Evaluate Prompt" to see results.</p>
@@ -1879,6 +2191,18 @@
                 }
             });
 
+            // Update active navigation state
+            document.querySelectorAll('.nav-link').forEach(link => {
+                const linkText = link.textContent.trim().toLowerCase();
+                if (linkText.includes(section)) {
+                    link.classList.add('active');
+                    link.setAttribute('aria-current', 'page');
+                } else {
+                    link.classList.remove('active');
+                    link.removeAttribute('aria-current');
+                }
+            });
+
             // Re-render if needed
             if (section === 'templates') renderTemplates();
             if (section === 'history') renderHistory();
@@ -2178,16 +2502,37 @@ Consider:
         }
 
         function displayEvaluationResults(evaluation, promptText, targetModel) {
-            const scoreColor = evaluation.score >= 80 ? 'var(--accent-success)' :
-                              evaluation.score >= 60 ? 'var(--accent-warning)' :
-                              'var(--accent-danger)';
+            // Determine score level for styling
+            let scoreLevel, statusText, statusIcon;
+            if (evaluation.score < 40) {
+                scoreLevel = 'critical';
+                statusText = 'Critical - Immediate Improvement Required';
+                statusIcon = 'alert-triangle';
+            } else if (evaluation.score < 60) {
+                scoreLevel = 'poor';
+                statusText = 'Needs Improvement';
+                statusIcon = 'alert-circle';
+            } else if (evaluation.score < 80) {
+                scoreLevel = 'good';
+                statusText = 'Good Quality';
+                statusIcon = 'check-circle';
+            } else {
+                scoreLevel = 'excellent';
+                statusText = 'Excellent Quality';
+                statusIcon = 'award';
+            }
 
             const resultsHTML = `
-                <div class="score-container">
-                    <div class="score-circle" style="--score: ${evaluation.score}">
-                        <div class="score-value">${evaluation.score}</div>
+                <div class="score-container ${scoreLevel === 'critical' ? 'score-critical' : ''}">
+                    <div class="score-circle" style="--score: ${evaluation.score}" data-score-level="${scoreLevel}">
+                        <div class="score-value" data-score-level="${scoreLevel}">${evaluation.score}</div>
                     </div>
                     <div class="score-label">Quality Score for ${targetModel}</div>
+                    <div class="score-status status-${scoreLevel}">
+                        <i data-lucide="${statusIcon}"></i>
+                        <span>${statusText}</span>
+                        <span class="sr-only">Score is ${evaluation.score} out of 100</span>
+                    </div>
                 </div>
 
                 ${evaluation.strengths && evaluation.strengths.length > 0 ? `
