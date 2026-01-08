@@ -231,6 +231,121 @@
             align-self: flex-end;
         }
 
+        /* ==================== LOG ENTRIES ==================== */
+        .log-entry {
+            background: var(--card-bg);
+            border-left: 4px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            transition: all var(--transition-speed);
+        }
+
+        .log-entry:hover {
+            transform: translateX(4px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .log-entry.level-DEBUG {
+            border-left-color: #6c757d;
+        }
+
+        .log-entry.level-INFO {
+            border-left-color: var(--accent-primary);
+        }
+
+        .log-entry.level-WARN {
+            border-left-color: var(--accent-warning);
+        }
+
+        .log-entry.level-ERROR {
+            border-left-color: var(--accent-danger);
+        }
+
+        .log-entry.level-CRITICAL {
+            border-left-color: #ff1744;
+            background: rgba(255, 23, 68, 0.05);
+        }
+
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .log-level-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.75rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .log-level-badge.DEBUG {
+            background: #6c757d;
+            color: white;
+        }
+
+        .log-level-badge.INFO {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .log-level-badge.WARN {
+            background: var(--accent-warning);
+            color: white;
+        }
+
+        .log-level-badge.ERROR {
+            background: var(--accent-danger);
+            color: white;
+        }
+
+        .log-level-badge.CRITICAL {
+            background: #ff1744;
+            color: white;
+        }
+
+        .log-category-badge {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+        }
+
+        .log-timestamp {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .log-message {
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .log-metadata {
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+            padding: 0.75rem;
+            margin-top: 0.5rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .log-metadata pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
         /* Sleek Dark Theme (Default) */
         [data-theme="sleek-dark"] {
             --bg-primary: #0a0e27;
@@ -790,6 +905,11 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showSection('logs')">
+                            <i data-lucide="file-text"></i> Logs
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="#" onclick="openSettingsModal()">
                             <i data-lucide="settings"></i> Settings
                         </a>
@@ -1004,6 +1124,90 @@
                 <!-- History items will be dynamically inserted here -->
             </div>
         </div>
+
+        <!-- ==================== LOGS SECTION ==================== -->
+        <div id="logs-section" class="section-content" style="display: none;">
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <h2 class="text-gradient">Event Logs</h2>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button class="btn-secondary-custom btn-icon btn-sm" onclick="Logger.clearOldLogs(); renderLogs(); showToast('Cleaned', 'Old logs removed', 'success')">
+                                <i data-lucide="trash"></i> Clean Old
+                            </button>
+                            <button class="btn-secondary-custom btn-icon btn-sm" onclick="Logger.exportLogs('json')">
+                                <i data-lucide="download"></i> JSON
+                            </button>
+                            <button class="btn-secondary-custom btn-icon btn-sm" onclick="Logger.exportLogs('csv')">
+                                <i data-lucide="download"></i> CSV
+                            </button>
+                            <button class="btn-secondary-custom btn-icon btn-sm" onclick="Logger.exportLogs('txt')">
+                                <i data-lucide="download"></i> TXT
+                            </button>
+                            <button class="btn-secondary-custom btn-icon btn-sm" onclick="clearAllLogs()">
+                                <i data-lucide="trash-2"></i> Clear All
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="filter-controls">
+                <div class="filter-row">
+                    <div class="filter-item">
+                        <label class="form-label-custom">Search Message</label>
+                        <input type="text" id="logSearch" class="form-control-custom"
+                            placeholder="Search in messages..." onkeyup="filterLogs()">
+                    </div>
+                    <div class="filter-item">
+                        <label class="form-label-custom">Log Level</label>
+                        <select id="logLevelFilter" class="form-control-custom form-select" onchange="filterLogs()">
+                            <option value="">All Levels</option>
+                            <option value="DEBUG">🔍 Debug</option>
+                            <option value="INFO">ℹ️ Info</option>
+                            <option value="WARN">⚠️ Warning</option>
+                            <option value="ERROR">❌ Error</option>
+                            <option value="CRITICAL">🔥 Critical</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <label class="form-label-custom">Category</label>
+                        <select id="logCategoryFilter" class="form-control-custom form-select" onchange="filterLogs()">
+                            <option value="">All Categories</option>
+                            <option value="USER_ACTION">👤 User Action</option>
+                            <option value="API_CALL">🌐 API Call</option>
+                            <option value="SYSTEM">⚙️ System</option>
+                            <option value="ERROR">❌ Error</option>
+                            <option value="PERFORMANCE">⚡ Performance</option>
+                            <option value="SECURITY">🔒 Security</option>
+                            <option value="DATA">💾 Data</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <label class="form-label-custom">Time Range</label>
+                        <select id="logTimeFilter" class="form-control-custom form-select" onchange="filterLogs()">
+                            <option value="">All Time</option>
+                            <option value="1h">Last Hour</option>
+                            <option value="24h">Last 24 Hours</option>
+                            <option value="7d">Last 7 Days</option>
+                            <option value="30d">Last 30 Days</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-3 d-flex justify-content-between align-items-center">
+                    <small class="text-muted" id="logCount">Showing 0 of 0 logs</small>
+                    <button class="btn-secondary-custom btn-sm" onclick="clearLogFilters()">
+                        <i data-lucide="x"></i> Clear Filters
+                    </button>
+                </div>
+            </div>
+
+            <!-- Logs Container -->
+            <div id="logsContainer">
+                <!-- Log entries will be dynamically inserted here -->
+            </div>
+        </div>
     </div>
 
     <!-- ==================== SETTINGS MODAL ==================== -->
@@ -1158,7 +1362,29 @@
             CACHE_DURATION: 3600000, // 1 hour
             RETRY_ATTEMPTS: 3,
             RETRY_DELAY_BASE: 2000, // 2 seconds
-            TOAST_DURATION: 5000
+            TOAST_DURATION: 5000,
+            MAX_LOG_ENTRIES: 1000, // Maximum log entries to keep
+            LOG_RETENTION_DAYS: 7 // Days to keep logs
+        };
+
+        // Log levels
+        const LOG_LEVEL = {
+            DEBUG: 0,
+            INFO: 1,
+            WARN: 2,
+            ERROR: 3,
+            CRITICAL: 4
+        };
+
+        // Log categories
+        const LOG_CATEGORY = {
+            USER_ACTION: 'USER_ACTION',
+            API_CALL: 'API_CALL',
+            SYSTEM: 'SYSTEM',
+            ERROR: 'ERROR',
+            PERFORMANCE: 'PERFORMANCE',
+            SECURITY: 'SECURITY',
+            DATA: 'DATA'
         };
 
         // ==================== STATE MANAGEMENT ====================
@@ -1169,6 +1395,7 @@
             templates: safeJSONParse(localStorage.getItem('templates'), []),
             history: safeJSONParse(localStorage.getItem('history'), []),
             favorites: safeJSONParse(localStorage.getItem('favorites'), []),
+            logs: safeJSONParse(localStorage.getItem('event_logs'), []),
             currentTemplate: null,
             lastImprovedPrompt: '',
             apiCache: new Map()
@@ -1237,6 +1464,154 @@
         // Sleep utility for retry logic
         function sleep(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // ==================== EVENT LOGGER ====================
+
+        class Logger {
+            static log(level, category, message, metadata = {}) {
+                const logEntry = {
+                    id: generateId(),
+                    timestamp: new Date().toISOString(),
+                    level: level,
+                    levelName: Object.keys(LOG_LEVEL).find(key => LOG_LEVEL[key] === level),
+                    category: category,
+                    message: message,
+                    metadata: metadata,
+                    userAgent: navigator.userAgent,
+                    url: window.location.href
+                };
+
+                // Add to logs array
+                appState.logs.unshift(logEntry);
+
+                // Enforce max log entries
+                if (appState.logs.length > CONFIG.MAX_LOG_ENTRIES) {
+                    appState.logs = appState.logs.slice(0, CONFIG.MAX_LOG_ENTRIES);
+                }
+
+                // Save to localStorage
+                try {
+                    localStorage.setItem('event_logs', JSON.stringify(appState.logs));
+                } catch (e) {
+                    // If storage is full, remove oldest logs and try again
+                    appState.logs = appState.logs.slice(0, Math.floor(CONFIG.MAX_LOG_ENTRIES / 2));
+                    try {
+                        localStorage.setItem('event_logs', JSON.stringify(appState.logs));
+                    } catch (e2) {
+                        console.error('Failed to save logs:', e2);
+                    }
+                }
+
+                // Console output for debugging
+                const consoleMethods = {
+                    [LOG_LEVEL.DEBUG]: 'debug',
+                    [LOG_LEVEL.INFO]: 'info',
+                    [LOG_LEVEL.WARN]: 'warn',
+                    [LOG_LEVEL.ERROR]: 'error',
+                    [LOG_LEVEL.CRITICAL]: 'error'
+                };
+                console[consoleMethods[level]](`[${logEntry.levelName}] [${category}] ${message}`, metadata);
+
+                return logEntry;
+            }
+
+            static debug(category, message, metadata) {
+                return this.log(LOG_LEVEL.DEBUG, category, message, metadata);
+            }
+
+            static info(category, message, metadata) {
+                return this.log(LOG_LEVEL.INFO, category, message, metadata);
+            }
+
+            static warn(category, message, metadata) {
+                return this.log(LOG_LEVEL.WARN, category, message, metadata);
+            }
+
+            static error(category, message, metadata) {
+                return this.log(LOG_LEVEL.ERROR, category, message, metadata);
+            }
+
+            static critical(category, message, metadata) {
+                return this.log(LOG_LEVEL.CRITICAL, category, message, metadata);
+            }
+
+            static clearOldLogs() {
+                const cutoffDate = new Date();
+                cutoffDate.setDate(cutoffDate.getDate() - CONFIG.LOG_RETENTION_DAYS);
+
+                const beforeCount = appState.logs.length;
+                appState.logs = appState.logs.filter(log => {
+                    const logDate = new Date(log.timestamp);
+                    return logDate > cutoffDate;
+                });
+
+                const removedCount = beforeCount - appState.logs.length;
+
+                if (removedCount > 0) {
+                    localStorage.setItem('event_logs', JSON.stringify(appState.logs));
+                    this.info(LOG_CATEGORY.SYSTEM, `Cleaned up ${removedCount} old log entries`, {
+                        beforeCount,
+                        afterCount: appState.logs.length
+                    });
+                }
+
+                return removedCount;
+            }
+
+            static clearAllLogs() {
+                appState.logs = [];
+                localStorage.setItem('event_logs', JSON.stringify(appState.logs));
+                console.log('All logs cleared');
+            }
+
+            static exportLogs(format = 'json') {
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                let blob, filename;
+
+                if (format === 'json') {
+                    const data = {
+                        exportDate: new Date().toISOString(),
+                        logCount: appState.logs.length,
+                        logs: appState.logs
+                    };
+                    blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                    filename = `promptos-logs-${timestamp}.json`;
+                } else if (format === 'csv') {
+                    let csv = 'Timestamp,Level,Category,Message,Metadata\n';
+                    appState.logs.forEach(log => {
+                        const metadataStr = JSON.stringify(log.metadata).replace(/"/g, '""');
+                        csv += `"${log.timestamp}","${log.levelName}","${log.category}","${log.message.replace(/"/g, '""')}","${metadataStr}"\n`;
+                    });
+                    blob = new Blob([csv], { type: 'text/csv' });
+                    filename = `promptos-logs-${timestamp}.csv`;
+                } else if (format === 'txt') {
+                    let txt = `Promptos Event Logs\nExported: ${new Date().toISOString()}\nTotal Entries: ${appState.logs.length}\n\n`;
+                    txt += '='.repeat(80) + '\n\n';
+                    appState.logs.forEach(log => {
+                        txt += `[${log.timestamp}] [${log.levelName}] [${log.category}]\n`;
+                        txt += `${log.message}\n`;
+                        if (Object.keys(log.metadata).length > 0) {
+                            txt += `Metadata: ${JSON.stringify(log.metadata, null, 2)}\n`;
+                        }
+                        txt += '-'.repeat(80) + '\n\n';
+                    });
+                    blob = new Blob([txt], { type: 'text/plain' });
+                    filename = `promptos-logs-${timestamp}.txt`;
+                }
+
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                a.click();
+                URL.revokeObjectURL(url);
+
+                this.info(LOG_CATEGORY.USER_ACTION, `Exported logs as ${format.toUpperCase()}`, {
+                    format,
+                    logCount: appState.logs.length
+                });
+            }
         }
 
         // ==================== TOAST NOTIFICATIONS ====================
@@ -1448,6 +1823,16 @@
 
         // ==================== INITIALIZATION ====================
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize logger
+            Logger.info(LOG_CATEGORY.SYSTEM, 'Application initialized', {
+                version: '1.2',
+                theme: appState.theme,
+                logsCount: appState.logs.length
+            });
+
+            // Clean old logs on startup
+            Logger.clearOldLogs();
+
             // Initialize Lucide icons
             lucide.createIcons();
 
@@ -1462,6 +1847,7 @@
             // Initialize default templates if none exist
             if (appState.templates.length === 0) {
                 initializeDefaultTemplates();
+                Logger.info(LOG_CATEGORY.DATA, 'Initialized default templates');
             }
 
             // Initialize keyboard shortcuts
@@ -1487,7 +1873,7 @@
 
         // ==================== NAVIGATION ====================
         function showSection(section) {
-            const sections = ['evaluate', 'templates', 'history'];
+            const sections = ['evaluate', 'templates', 'history', 'logs'];
             sections.forEach(s => {
                 const element = document.getElementById(`${s}-section`);
                 if (element) {
@@ -1498,6 +1884,10 @@
             // Re-render if needed
             if (section === 'templates') renderTemplates();
             if (section === 'history') renderHistory();
+            if (section === 'logs') renderLogs();
+
+            // Log navigation
+            Logger.info(LOG_CATEGORY.USER_ACTION, `Navigated to ${section} section`);
 
             // Reinitialize icons
             setTimeout(() => lucide.createIcons(), 100);
@@ -1553,15 +1943,19 @@
         }
 
         async function callGeminiAPI(prompt, systemInstruction = '', useCache = true) {
+            const startTime = performance.now();
+
             // Check if online
             if (!navigator.onLine) {
                 showToast('Offline', 'You are currently offline', 'error');
+                Logger.warn(LOG_CATEGORY.API_CALL, 'API call attempted while offline');
                 return null;
             }
 
             // Check API key
             if (!appState.apiKey) {
                 showToast('API Key Required', 'Please set your Gemini API key in Settings', 'warning');
+                Logger.warn(LOG_CATEGORY.SECURITY, 'API call attempted without API key');
                 openSettingsModal();
                 return null;
             }
@@ -1572,9 +1966,19 @@
                 const cached = getCachedResponse(cacheKey);
                 if (cached) {
                     showToast('Cached', 'Using cached result', 'info');
+                    Logger.info(LOG_CATEGORY.PERFORMANCE, 'API response served from cache', {
+                        model: appState.geminiModel,
+                        responseTime: (performance.now() - startTime).toFixed(2) + 'ms'
+                    });
                     return cached;
                 }
             }
+
+            Logger.info(LOG_CATEGORY.API_CALL, 'Calling Gemini API', {
+                model: appState.geminiModel,
+                promptLength: prompt.length,
+                hasSystemInstruction: !!systemInstruction
+            });
 
             // SECURITY FIX: API key in header instead of URL
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${appState.geminiModel}:generateContent?key=${appState.apiKey}`;
@@ -1623,13 +2027,40 @@
                     // Cache the successful response
                     cacheResponse(cacheKey, result);
 
+                    const responseTime = performance.now() - startTime;
+                    Logger.info(LOG_CATEGORY.API_CALL, 'Gemini API call successful', {
+                        model: appState.geminiModel,
+                        responseTime: responseTime.toFixed(2) + 'ms',
+                        responseLength: result.length,
+                        attempt: attempt + 1
+                    });
+
+                    // Log slow responses
+                    if (responseTime > 10000) { // More than 10 seconds
+                        Logger.warn(LOG_CATEGORY.PERFORMANCE, 'Slow API response detected', {
+                            responseTime: responseTime.toFixed(2) + 'ms',
+                            model: appState.geminiModel
+                        });
+                    }
+
                     return result;
                 } catch (error) {
                     console.error(`Gemini API Error (Attempt ${attempt + 1}/${CONFIG.RETRY_ATTEMPTS}):`, error);
 
+                    Logger.error(LOG_CATEGORY.API_CALL, `Gemini API error (Attempt ${attempt + 1}/${CONFIG.RETRY_ATTEMPTS})`, {
+                        error: error.message,
+                        errorName: error.name,
+                        model: appState.geminiModel,
+                        attempt: attempt + 1
+                    });
+
                     // If it's the last attempt, show error
                     if (attempt === CONFIG.RETRY_ATTEMPTS - 1) {
                         showToast('API Error', getErrorMessage(error), 'error');
+                        Logger.critical(LOG_CATEGORY.API_CALL, 'All API retry attempts failed', {
+                            error: error.message,
+                            totalAttempts: CONFIG.RETRY_ATTEMPTS
+                        });
                         return null;
                     }
 
@@ -1656,8 +2087,14 @@
 
             if (!promptText) {
                 showToast('Missing Input', 'Please enter a prompt to evaluate', 'warning');
+                Logger.warn(LOG_CATEGORY.USER_ACTION, 'Attempted to evaluate empty prompt');
                 return;
             }
+
+            Logger.info(LOG_CATEGORY.USER_ACTION, 'Started prompt evaluation', {
+                targetModel,
+                promptLength: promptText.length
+            });
 
             // Get button and set loading state
             const button = event ? event.target.closest('button') : document.querySelector('button[onclick="evaluatePrompt()"]');
@@ -1710,9 +2147,18 @@ Consider:
                     // Save to history
                     saveToHistory(promptText, targetModel, evaluation);
 
+                    Logger.info(LOG_CATEGORY.USER_ACTION, 'Prompt evaluated successfully', {
+                        score: evaluation.score,
+                        targetModel
+                    });
+
                     showToast('Success', 'Prompt evaluated successfully', 'success');
                 } catch (error) {
                     console.error('Parse error:', error);
+                    Logger.error(LOG_CATEGORY.ERROR, 'Failed to parse evaluation results', {
+                        error: error.message,
+                        stack: error.stack
+                    });
                     resultsContainer.innerHTML = `
                         <div class="text-center text-muted py-5">
                             <i data-lucide="alert-circle" style="width: 48px; height: 48px; margin-bottom: 1rem;"></i>
@@ -2129,8 +2575,17 @@ Make the prompt:
 
             try {
                 localStorage.setItem('templates', JSON.stringify(appState.templates));
+                Logger.info(LOG_CATEGORY.DATA, 'Template created successfully', {
+                    templateName: name,
+                    category,
+                    contentLength: content.length
+                });
             } catch (e) {
                 showToast('Storage Error', 'Failed to save template. Storage may be full.', 'error');
+                Logger.error(LOG_CATEGORY.ERROR, 'Failed to save template to localStorage', {
+                    error: e.message,
+                    templateName: name
+                });
                 appState.templates.pop(); // Rollback
                 return;
             }
@@ -2321,11 +2776,20 @@ Make the prompt:
 
         function clearHistory() {
             if (confirm('Are you sure you want to clear all history? This will also clear your favorites.')) {
+                const historyCount = appState.history.length;
+                const favoritesCount = appState.favorites.length;
+
                 appState.history = [];
                 // FIX EDGE-003: Clear favorites when clearing history to avoid orphaned references
                 appState.favorites = [];
                 localStorage.setItem('history', JSON.stringify(appState.history));
                 localStorage.setItem('favorites', JSON.stringify(appState.favorites));
+
+                Logger.info(LOG_CATEGORY.DATA, 'History and favorites cleared', {
+                    historyItemsCleared: historyCount,
+                    favoritesCleared: favoritesCount
+                });
+
                 renderHistory();
                 showToast('Cleared', 'History and favorites cleared successfully', 'success');
             }
@@ -2469,6 +2933,11 @@ Make the prompt:
             localStorage.setItem('gemini_api_key', obfuscateKey(apiKey));
             localStorage.setItem('gemini_model', geminiModel);
 
+            Logger.info(LOG_CATEGORY.SECURITY, 'Settings updated', {
+                model: geminiModel,
+                apiKeySet: true
+            });
+
             bootstrap.Modal.getInstance(document.getElementById('settingsModal')).hide();
             showToast('Saved', 'Settings saved successfully', 'success');
         }
@@ -2481,6 +2950,151 @@ Make the prompt:
 
             // FIX BUG-009: Re-render icons after theme change to update colors
             setTimeout(() => lucide.createIcons(), 100);
+        }
+
+        // ==================== LOGS VIEWER ====================
+
+        function renderLogs() {
+            filterLogs(); // Use filter function to render
+        }
+
+        function filterLogs() {
+            const searchTerm = document.getElementById('logSearch')?.value.toLowerCase() || '';
+            const levelFilter = document.getElementById('logLevelFilter')?.value || '';
+            const categoryFilter = document.getElementById('logCategoryFilter')?.value || '';
+            const timeFilter = document.getElementById('logTimeFilter')?.value || '';
+
+            let filtered = appState.logs;
+
+            // Search filter
+            if (searchTerm) {
+                filtered = filtered.filter(log =>
+                    log.message.toLowerCase().includes(searchTerm) ||
+                    JSON.stringify(log.metadata).toLowerCase().includes(searchTerm)
+                );
+            }
+
+            // Level filter
+            if (levelFilter) {
+                filtered = filtered.filter(log => log.levelName === levelFilter);
+            }
+
+            // Category filter
+            if (categoryFilter) {
+                filtered = filtered.filter(log => log.category === categoryFilter);
+            }
+
+            // Time filter
+            if (timeFilter) {
+                const now = new Date();
+                const cutoffTime = new Date();
+
+                switch (timeFilter) {
+                    case '1h':
+                        cutoffTime.setHours(now.getHours() - 1);
+                        break;
+                    case '24h':
+                        cutoffTime.setHours(now.getHours() - 24);
+                        break;
+                    case '7d':
+                        cutoffTime.setDate(now.getDate() - 7);
+                        break;
+                    case '30d':
+                        cutoffTime.setDate(now.getDate() - 30);
+                        break;
+                }
+
+                filtered = filtered.filter(log => new Date(log.timestamp) > cutoffTime);
+            }
+
+            renderFilteredLogs(filtered);
+        }
+
+        function renderFilteredLogs(filtered) {
+            const container = document.getElementById('logsContainer');
+            const countElement = document.getElementById('logCount');
+
+            // Update count
+            countElement.textContent = `Showing ${filtered.length} of ${appState.logs.length} logs`;
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-muted py-5">
+                        <i data-lucide="inbox" style="width: 48px; height: 48px; margin-bottom: 1rem;"></i>
+                        <p>No log entries found.</p>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            // Level emojis
+            const levelEmojis = {
+                'DEBUG': '🔍',
+                'INFO': 'ℹ️',
+                'WARN': '⚠️',
+                'ERROR': '❌',
+                'CRITICAL': '🔥'
+            };
+
+            // Category emojis
+            const categoryEmojis = {
+                'USER_ACTION': '👤',
+                'API_CALL': '🌐',
+                'SYSTEM': '⚙️',
+                'ERROR': '❌',
+                'PERFORMANCE': '⚡',
+                'SECURITY': '🔒',
+                'DATA': '💾'
+            };
+
+            container.innerHTML = filtered.map(log => {
+                const date = new Date(log.timestamp).toLocaleString();
+                const hasMetadata = Object.keys(log.metadata).length > 0;
+
+                return `
+                    <div class="log-entry level-${log.levelName}">
+                        <div class="log-header">
+                            <div class="d-flex gap-2 align-items-center flex-wrap">
+                                <span class="log-level-badge ${log.levelName}">
+                                    ${levelEmojis[log.levelName] || ''} ${log.levelName}
+                                </span>
+                                <span class="log-category-badge">
+                                    ${categoryEmojis[log.category] || ''} ${log.category}
+                                </span>
+                            </div>
+                            <span class="log-timestamp">${escapeHTML(date)}</span>
+                        </div>
+                        <div class="log-message">${escapeHTML(log.message)}</div>
+                        ${hasMetadata ? `
+                            <details class="log-metadata">
+                                <summary style="cursor: pointer; font-weight: 600; margin-bottom: 0.5rem;">
+                                    View Metadata
+                                </summary>
+                                <pre>${escapeHTML(JSON.stringify(log.metadata, null, 2))}</pre>
+                            </details>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+
+            lucide.createIcons();
+        }
+
+        function clearLogFilters() {
+            document.getElementById('logSearch').value = '';
+            document.getElementById('logLevelFilter').value = '';
+            document.getElementById('logCategoryFilter').value = '';
+            document.getElementById('logTimeFilter').value = '';
+            filterLogs();
+        }
+
+        function clearAllLogs() {
+            if (confirm('Are you sure you want to clear all logs? This action cannot be undone.')) {
+                Logger.clearAllLogs();
+                renderLogs();
+                showToast('Cleared', 'All logs cleared successfully', 'success');
+            }
         }
     </script>
 </body>
