@@ -1551,22 +1551,84 @@
                 </div>
                 <div class="modal-body modal-body-custom">
                     <div class="mb-4">
-                        <label class="form-label-custom">Google Gemini API Key</label>
-                        <input type="password" id="apiKeyInput" class="form-control-custom"
-                            placeholder="Enter your API key">
-                        <small class="text-muted">Get your API key from <a href="https://makersuite.google.com/app/apikey" target="_blank">Google AI Studio</a></small>
+                        <label class="form-label-custom">LLM Provider</label>
+                        <select id="llmProvider" class="form-control-custom form-select" onchange="toggleProviderSettings()">
+                            <option value="gemini">Google Gemini (Cloud)</option>
+                            <option value="ollama">Ollama (Local)</option>
+                        </select>
+                        <small class="text-muted">Choose between cloud-based Google Gemini or local Ollama models</small>
                     </div>
 
-                    <div class="mb-4">
-                        <label class="form-label-custom">Gemini Model</label>
-                        <select id="geminiModel" class="form-control-custom form-select">
-                            <option value="gemini-3-flash-preview">Gemini 3 Flash (Preview)</option>
-                            <option value="gemini-3-pro-preview">Gemini 3 Pro (Preview)</option>
-                            <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
-                            <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
-                            <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
-                        </select>
-                        <small class="text-muted">Gemini 3 models feature adaptive thinking and 1M token context. <a href="https://ai.google.dev/gemini-api/docs/models" target="_blank">View all models</a></small>
+                    <!-- Google Gemini Settings -->
+                    <div id="geminiSettings">
+                        <div class="mb-4">
+                            <label class="form-label-custom">Google Gemini API Key</label>
+                            <input type="password" id="apiKeyInput" class="form-control-custom"
+                                placeholder="Enter your API key">
+                            <small class="text-muted">Get your API key from <a href="https://makersuite.google.com/app/apikey" target="_blank">Google AI Studio</a></small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label-custom">Gemini Model</label>
+                            <select id="geminiModel" class="form-control-custom form-select">
+                                <option value="gemini-3-flash-preview">Gemini 3 Flash (Preview)</option>
+                                <option value="gemini-3-pro-preview">Gemini 3 Pro (Preview)</option>
+                                <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                                <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+                                <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+                            </select>
+                            <small class="text-muted">Gemini 3 models feature adaptive thinking and 1M token context. <a href="https://ai.google.dev/gemini-api/docs/models" target="_blank">View all models</a></small>
+                        </div>
+                    </div>
+
+                    <!-- Ollama Settings -->
+                    <div id="ollamaSettings" style="display: none;">
+                        <div class="mb-4">
+                            <label class="form-label-custom">Ollama Endpoint URL</label>
+                            <input type="text" id="ollamaEndpoint" class="form-control-custom"
+                                placeholder="http://localhost:11434" value="http://localhost:11434">
+                            <small class="text-muted">Default: http://localhost:11434 - Make sure Ollama is running locally</small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label-custom">Ollama Model</label>
+                            <div class="input-group">
+                                <select id="ollamaModel" class="form-control-custom form-select">
+                                    <option value="llama3.3:70b">Llama 3.3 70B</option>
+                                    <option value="llama3.2:90b">Llama 3.2 90B</option>
+                                    <option value="llama3.1:70b">Llama 3.1 70B</option>
+                                    <option value="llama3.1:8b">Llama 3.1 8B</option>
+                                    <option value="llama3:70b">Llama 3 70B</option>
+                                    <option value="llama3:8b">Llama 3 8B</option>
+                                    <option value="qwen2.5:72b">Qwen 2.5 72B</option>
+                                    <option value="qwen2.5:32b">Qwen 2.5 32B</option>
+                                    <option value="qwen2.5:14b">Qwen 2.5 14B</option>
+                                    <option value="qwen2.5:7b">Qwen 2.5 7B</option>
+                                    <option value="mistral:7b">Mistral 7B</option>
+                                    <option value="mixtral:8x7b">Mixtral 8x7B</option>
+                                    <option value="gemma2:27b">Gemma 2 27B</option>
+                                    <option value="gemma2:9b">Gemma 2 9B</option>
+                                    <option value="phi4:14b">Phi 4 14B</option>
+                                    <option value="deepseek-r1:70b">DeepSeek R1 70B</option>
+                                    <option value="deepseek-r1:32b">DeepSeek R1 32B</option>
+                                    <option value="deepseek-r1:14b">DeepSeek R1 14B</option>
+                                    <option value="deepseek-r1:8b">DeepSeek R1 8B</option>
+                                    <option value="deepseek-r1:7b">DeepSeek R1 7B</option>
+                                    <option value="custom">Custom Model...</option>
+                                </select>
+                                <button type="button" class="btn-secondary-custom btn-icon" onclick="refreshOllamaModels()" title="Refresh available models from Ollama">
+                                    <i data-lucide="refresh-cw"></i>
+                                </button>
+                            </div>
+                            <small class="text-muted">Select a model or refresh to see your locally installed Ollama models</small>
+                        </div>
+
+                        <div class="mb-4" id="customModelDiv" style="display: none;">
+                            <label class="form-label-custom">Custom Model Name</label>
+                            <input type="text" id="ollamaCustomModel" class="form-control-custom"
+                                placeholder="e.g., llama2:13b">
+                            <small class="text-muted">Enter the exact model name from 'ollama list'</small>
+                        </div>
                     </div>
 
                     <div class="mb-4">
@@ -1724,8 +1786,12 @@
 
         // ==================== STATE MANAGEMENT ====================
         let appState = {
+            llmProvider: localStorage.getItem('llm_provider') || 'gemini',
             apiKey: localStorage.getItem('gemini_api_key') ? deobfuscateKey(localStorage.getItem('gemini_api_key')) : '',
             geminiModel: localStorage.getItem('gemini_model') || 'gemini-3-flash-preview',
+            ollamaEndpoint: localStorage.getItem('ollama_endpoint') || 'http://localhost:11434',
+            ollamaModel: localStorage.getItem('ollama_model') || 'llama3.3:70b',
+            ollamaCustomModel: localStorage.getItem('ollama_custom_model') || '',
             theme: localStorage.getItem('theme') || 'sleek-dark',
             templates: safeJSONParse(localStorage.getItem('templates'), []),
             history: safeJSONParse(localStorage.getItem('history'), []),
@@ -2175,9 +2241,16 @@
             document.body.setAttribute('data-theme', appState.theme);
 
             // Load settings
+            document.getElementById('llmProvider').value = appState.llmProvider;
             document.getElementById('apiKeyInput').value = appState.apiKey;
             document.getElementById('geminiModel').value = appState.geminiModel;
+            document.getElementById('ollamaEndpoint').value = appState.ollamaEndpoint;
+            document.getElementById('ollamaModel').value = appState.ollamaModel;
+            document.getElementById('ollamaCustomModel').value = appState.ollamaCustomModel;
             document.getElementById('themeSelect').value = appState.theme;
+
+            // Show/hide provider-specific settings
+            toggleProviderSettings();
 
             // Initialize default templates if none exist
             if (appState.templates.length === 0) {
@@ -2427,10 +2500,171 @@
             return null;
         }
 
+        async function callOllamaAPI(prompt, systemInstruction = '', useCache = true) {
+            const startTime = performance.now();
+
+            // Check cache
+            const cacheKey = `${prompt}-${systemInstruction}-${appState.ollamaModel}`;
+            if (useCache) {
+                const cached = getCachedResponse(cacheKey);
+                if (cached) {
+                    showToast('Cached', 'Using cached result', 'info');
+                    Logger.info(LOG_CATEGORY.PERFORMANCE, 'API response served from cache', {
+                        model: appState.ollamaModel,
+                        responseTime: (performance.now() - startTime).toFixed(2) + 'ms'
+                    });
+                    return cached;
+                }
+            }
+
+            Logger.info(LOG_CATEGORY.API_CALL, 'Calling Ollama API', {
+                endpoint: appState.ollamaEndpoint,
+                model: appState.ollamaModel,
+                promptLength: prompt.length,
+                hasSystemInstruction: !!systemInstruction
+            });
+
+            const url = `${appState.ollamaEndpoint}/api/generate`;
+
+            const requestBody = {
+                model: appState.ollamaModel,
+                prompt: systemInstruction ? `${systemInstruction}\n\n${prompt}` : prompt,
+                stream: false,
+                options: {
+                    temperature: 0.7,
+                    top_k: 40,
+                    top_p: 0.95
+                }
+            };
+
+            // Retry logic with exponential backoff
+            for (let attempt = 0; attempt < CONFIG.RETRY_ATTEMPTS; attempt++) {
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), CONFIG.API_TIMEOUT);
+
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(requestBody),
+                        signal: controller.signal
+                    });
+
+                    clearTimeout(timeoutId);
+
+                    if (!response.ok) {
+                        let errorMessage = 'Ollama API request failed';
+                        try {
+                            const error = await response.json();
+                            errorMessage = error.error || errorMessage;
+                        } catch (e) {
+                            errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+                        }
+                        throw new Error(errorMessage);
+                    }
+
+                    const data = await response.json();
+                    const result = data.response;
+
+                    // Cache the successful response
+                    cacheResponse(cacheKey, result);
+
+                    const responseTime = performance.now() - startTime;
+                    Logger.info(LOG_CATEGORY.API_CALL, 'Ollama API call successful', {
+                        endpoint: appState.ollamaEndpoint,
+                        model: appState.ollamaModel,
+                        responseTime: responseTime.toFixed(2) + 'ms',
+                        responseLength: result.length,
+                        attempt: attempt + 1
+                    });
+
+                    // Log slow responses
+                    if (responseTime > 10000) { // More than 10 seconds
+                        Logger.warn(LOG_CATEGORY.PERFORMANCE, 'Slow API response detected', {
+                            responseTime: responseTime.toFixed(2) + 'ms',
+                            model: appState.ollamaModel
+                        });
+                    }
+
+                    return result;
+                } catch (error) {
+                    console.error(`Ollama API Error (Attempt ${attempt + 1}/${CONFIG.RETRY_ATTEMPTS}):`, error);
+
+                    Logger.error(LOG_CATEGORY.API_CALL, `Ollama API error (Attempt ${attempt + 1}/${CONFIG.RETRY_ATTEMPTS})`, {
+                        error: error.message,
+                        errorName: error.name,
+                        endpoint: appState.ollamaEndpoint,
+                        model: appState.ollamaModel,
+                        attempt: attempt + 1
+                    });
+
+                    // If it's the last attempt, show error
+                    if (attempt === CONFIG.RETRY_ATTEMPTS - 1) {
+                        showToast('API Error', `Ollama Error: ${error.message}`, 'error');
+                        Logger.critical(LOG_CATEGORY.API_CALL, 'All Ollama API retry attempts failed', {
+                            error: error.message,
+                            totalAttempts: CONFIG.RETRY_ATTEMPTS
+                        });
+                        return null;
+                    }
+
+                    // If it's a network error, retry
+                    if (error.name === 'AbortError' || error.message.includes('fetch') || error.message.includes('Failed to fetch')) {
+                        const delay = CONFIG.RETRY_DELAY_BASE * Math.pow(2, attempt);
+                        showToast('Retrying', `Attempt ${attempt + 2}/${CONFIG.RETRY_ATTEMPTS} in ${delay/1000}s...`, 'warning');
+                        await sleep(delay);
+                    } else {
+                        // For non-network errors, don't retry
+                        showToast('API Error', `Ollama Error: ${error.message}`, 'error');
+                        return null;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        // Unified LLM API caller that routes to the appropriate provider
+        async function callLLMAPI(prompt, systemInstruction = '', useCache = true) {
+            if (appState.llmProvider === 'gemini') {
+                // Check API key for Gemini
+                if (!appState.apiKey) {
+                    showToast('API Key Required', 'Please set your Gemini API key in Settings', 'warning');
+                    Logger.warn(LOG_CATEGORY.SECURITY, 'API call attempted without API key');
+                    openSettingsModal();
+                    return null;
+                }
+                return await callGeminiAPI(prompt, systemInstruction, useCache);
+            } else if (appState.llmProvider === 'ollama') {
+                // Check Ollama endpoint
+                if (!appState.ollamaEndpoint) {
+                    showToast('Endpoint Required', 'Please set your Ollama endpoint in Settings', 'warning');
+                    Logger.warn(LOG_CATEGORY.SECURITY, 'Ollama API call attempted without endpoint');
+                    openSettingsModal();
+                    return null;
+                }
+                return await callOllamaAPI(prompt, systemInstruction, useCache);
+            } else {
+                showToast('Invalid Provider', 'Please select a valid LLM provider in Settings', 'error');
+                return null;
+            }
+        }
+
         // ==================== PROMPT EVALUATION ====================
         async function evaluatePrompt() {
             const promptText = document.getElementById('promptInput').value.trim();
-            const targetModel = 'Google Gemini'; // Using Gemini as the default target model
+
+            // Determine target model based on provider
+            let targetModel;
+            if (appState.llmProvider === 'gemini') {
+                targetModel = `Google Gemini (${appState.geminiModel})`;
+            } else if (appState.llmProvider === 'ollama') {
+                targetModel = `Ollama (${appState.ollamaModel})`;
+            } else {
+                targetModel = 'LLM';
+            }
 
             if (!promptText) {
                 showToast('Missing Input', 'Please enter a prompt to evaluate', 'warning');
@@ -2439,6 +2673,7 @@
             }
 
             Logger.info(LOG_CATEGORY.USER_ACTION, 'Started prompt evaluation', {
+                provider: appState.llmProvider,
                 targetModel,
                 promptLength: promptText.length
             });
@@ -2477,7 +2712,7 @@ Consider:
 - Output format specifications
 - ${targetModel}-specific best practices`;
 
-            const response = await callGeminiAPI(promptText, systemInstruction);
+            const response = await callLLMAPI(promptText, systemInstruction);
 
             // Remove loading state
             if (button) setButtonLoading(button, false);
@@ -2595,7 +2830,16 @@ Consider:
         // ==================== PROMPT IMPROVEMENT ====================
         async function improvePrompt() {
             const promptText = document.getElementById('promptInput').value.trim();
-            const targetModel = 'Google Gemini'; // Using Gemini as the default target model
+
+            // Determine target model based on provider
+            let targetModel;
+            if (appState.llmProvider === 'gemini') {
+                targetModel = `Google Gemini (${appState.geminiModel})`;
+            } else if (appState.llmProvider === 'ollama') {
+                targetModel = `Ollama (${appState.ollamaModel})`;
+            } else {
+                targetModel = 'LLM';
+            }
 
             if (!promptText) {
                 showToast('Missing Input', 'Please enter a prompt to improve', 'warning');
@@ -2626,7 +2870,7 @@ Make the prompt:
 - More likely to get high-quality results from ${targetModel}
 - Include any missing context or constraints`;
 
-            const response = await callGeminiAPI(promptText, systemInstruction);
+            const response = await callLLMAPI(promptText, systemInstruction);
 
             // Remove loading state
             if (button) setButtonLoading(button, false);
@@ -3286,29 +3530,166 @@ Make the prompt:
         }
 
         function saveSettings() {
-            const apiKey = document.getElementById('apiKeyInput').value.trim();
-            const geminiModel = document.getElementById('geminiModel').value;
+            const llmProvider = document.getElementById('llmProvider').value;
 
-            if (!apiKey) {
-                showToast('Missing API Key', 'Please enter an API key', 'warning');
-                return;
+            if (llmProvider === 'gemini') {
+                const apiKey = document.getElementById('apiKeyInput').value.trim();
+                const geminiModel = document.getElementById('geminiModel').value;
+
+                if (!apiKey) {
+                    showToast('Missing API Key', 'Please enter a Google Gemini API key', 'warning');
+                    return;
+                }
+
+                appState.apiKey = apiKey;
+                appState.geminiModel = geminiModel;
+                appState.llmProvider = llmProvider;
+
+                // Obfuscate API key before storing
+                localStorage.setItem('gemini_api_key', obfuscateKey(apiKey));
+                localStorage.setItem('gemini_model', geminiModel);
+                localStorage.setItem('llm_provider', llmProvider);
+
+                Logger.info(LOG_CATEGORY.SECURITY, 'Settings updated', {
+                    provider: llmProvider,
+                    model: geminiModel,
+                    apiKeySet: true
+                });
+            } else if (llmProvider === 'ollama') {
+                const ollamaEndpoint = document.getElementById('ollamaEndpoint').value.trim();
+                const ollamaModel = document.getElementById('ollamaModel').value;
+                const ollamaCustomModel = document.getElementById('ollamaCustomModel').value.trim();
+
+                if (!ollamaEndpoint) {
+                    showToast('Missing Endpoint', 'Please enter an Ollama endpoint URL', 'warning');
+                    return;
+                }
+
+                const finalModel = ollamaModel === 'custom' ? ollamaCustomModel : ollamaModel;
+                if (!finalModel) {
+                    showToast('Missing Model', 'Please select or enter an Ollama model', 'warning');
+                    return;
+                }
+
+                appState.llmProvider = llmProvider;
+                appState.ollamaEndpoint = ollamaEndpoint;
+                appState.ollamaModel = finalModel;
+                appState.ollamaCustomModel = ollamaCustomModel;
+
+                localStorage.setItem('llm_provider', llmProvider);
+                localStorage.setItem('ollama_endpoint', ollamaEndpoint);
+                localStorage.setItem('ollama_model', finalModel);
+                localStorage.setItem('ollama_custom_model', ollamaCustomModel);
+
+                Logger.info(LOG_CATEGORY.SECURITY, 'Settings updated', {
+                    provider: llmProvider,
+                    endpoint: ollamaEndpoint,
+                    model: finalModel
+                });
             }
-
-            appState.apiKey = apiKey;
-            appState.geminiModel = geminiModel;
-
-            // Obfuscate API key before storing
-            localStorage.setItem('gemini_api_key', obfuscateKey(apiKey));
-            localStorage.setItem('gemini_model', geminiModel);
-
-            Logger.info(LOG_CATEGORY.SECURITY, 'Settings updated', {
-                model: geminiModel,
-                apiKeySet: true
-            });
 
             bootstrap.Modal.getInstance(document.getElementById('settingsModal')).hide();
             showToast('Saved', 'Settings saved successfully', 'success');
         }
+
+        function toggleProviderSettings() {
+            const provider = document.getElementById('llmProvider').value;
+            const geminiSettings = document.getElementById('geminiSettings');
+            const ollamaSettings = document.getElementById('ollamaSettings');
+            const customModelDiv = document.getElementById('customModelDiv');
+
+            if (provider === 'gemini') {
+                geminiSettings.style.display = 'block';
+                ollamaSettings.style.display = 'none';
+            } else if (provider === 'ollama') {
+                geminiSettings.style.display = 'none';
+                ollamaSettings.style.display = 'block';
+
+                // Check if custom model is selected
+                const ollamaModel = document.getElementById('ollamaModel').value;
+                if (ollamaModel === 'custom') {
+                    customModelDiv.style.display = 'block';
+                } else {
+                    customModelDiv.style.display = 'none';
+                }
+            }
+        }
+
+        async function refreshOllamaModels() {
+            const endpoint = document.getElementById('ollamaEndpoint').value.trim();
+            if (!endpoint) {
+                showToast('Missing Endpoint', 'Please enter an Ollama endpoint URL first', 'warning');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${endpoint}/api/tags`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                const modelSelect = document.getElementById('ollamaModel');
+
+                // Clear current options except the predefined ones
+                const predefinedCount = modelSelect.options.length - 1; // -1 for the "custom" option
+
+                // Get installed models
+                if (data.models && data.models.length > 0) {
+                    // Clear all options
+                    modelSelect.innerHTML = '';
+
+                    // Add installed models
+                    data.models.forEach(model => {
+                        const option = document.createElement('option');
+                        option.value = model.name;
+                        option.textContent = model.name;
+                        modelSelect.appendChild(option);
+                    });
+
+                    // Add custom option at the end
+                    const customOption = document.createElement('option');
+                    customOption.value = 'custom';
+                    customOption.textContent = 'Custom Model...';
+                    modelSelect.appendChild(customOption);
+
+                    showToast('Success', `Found ${data.models.length} installed Ollama models`, 'success');
+                    Logger.info(LOG_CATEGORY.SYSTEM, 'Ollama models refreshed', {
+                        endpoint: endpoint,
+                        count: data.models.length
+                    });
+                } else {
+                    showToast('No Models', 'No Ollama models found. Please install models using "ollama pull"', 'warning');
+                }
+            } catch (error) {
+                Logger.error(LOG_CATEGORY.ERROR, 'Failed to fetch Ollama models', {
+                    endpoint: endpoint,
+                    error: error.message
+                });
+                showToast('Connection Failed', `Could not connect to Ollama at ${endpoint}. Make sure Ollama is running.`, 'error');
+            }
+        }
+
+        // Add event listener for ollama model selection
+        document.addEventListener('DOMContentLoaded', function() {
+            const ollamaModelSelect = document.getElementById('ollamaModel');
+            if (ollamaModelSelect) {
+                ollamaModelSelect.addEventListener('change', function() {
+                    const customModelDiv = document.getElementById('customModelDiv');
+                    if (this.value === 'custom') {
+                        customModelDiv.style.display = 'block';
+                    } else {
+                        customModelDiv.style.display = 'none';
+                    }
+                });
+            }
+        });
 
         function changeTheme() {
             const theme = document.getElementById('themeSelect').value;
