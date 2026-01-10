@@ -1272,12 +1272,6 @@
                         </div>
                         <div class="card-body p-4">
                             <div class="mb-3">
-                                <label class="form-label-custom">Target Use Case</label>
-                                <select id="targetModel" class="form-control-custom form-select">
-                                    <option value="Gemini">Google Gemini</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
                                 <label class="form-label-custom">Your Prompt</label>
                                 <textarea id="promptInput" class="form-control-custom prompt-textarea-resizable" rows="18"
                                     placeholder="Enter your prompt here for evaluation..." maxlength="5000"
@@ -2436,7 +2430,7 @@
         // ==================== PROMPT EVALUATION ====================
         async function evaluatePrompt() {
             const promptText = document.getElementById('promptInput').value.trim();
-            const targetModel = document.getElementById('targetModel').value;
+            const targetModel = 'Google Gemini'; // Using Gemini as the default target model
 
             if (!promptText) {
                 showToast('Missing Input', 'Please enter a prompt to evaluate', 'warning');
@@ -2601,7 +2595,7 @@ Consider:
         // ==================== PROMPT IMPROVEMENT ====================
         async function improvePrompt() {
             const promptText = document.getElementById('promptInput').value.trim();
-            const targetModel = document.getElementById('targetModel').value;
+            const targetModel = 'Google Gemini'; // Using Gemini as the default target model
 
             if (!promptText) {
                 showToast('Missing Input', 'Please enter a prompt to improve', 'warning');
@@ -3142,7 +3136,7 @@ Make the prompt:
             const item = appState.history.find(h => h.id == id); // Use == for flexible comparison
             if (item) {
                 document.getElementById('promptInput').value = item.prompt;
-                document.getElementById('targetModel').value = item.targetModel;
+                // Target model is now hardcoded to Google Gemini
                 showSection('evaluate');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
