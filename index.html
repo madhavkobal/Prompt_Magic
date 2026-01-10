@@ -595,6 +595,31 @@
             margin-bottom: 0.5rem;
         }
 
+        /* ==================== RESIZABLE TEXTAREA ==================== */
+        .prompt-textarea-resizable {
+            resize: both;
+            overflow: auto;
+            max-width: 100%;
+            transition: all var(--transition-speed);
+        }
+
+        .prompt-textarea-resizable::-webkit-resizer {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: 0 0 4px 0;
+        }
+
+        /* Visual indicator for resize handle */
+        .prompt-textarea-resizable::after {
+            content: '⋰⋰';
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            color: var(--text-muted);
+            font-size: 12px;
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
         /* ==================== BUTTONS ==================== */
         /* ==================== BUTTON HIERARCHY ==================== */
         .btn-primary-custom {
@@ -1236,7 +1261,7 @@
         <!-- ==================== EVALUATE SECTION ==================== -->
         <div id="evaluate-section" class="section-content">
             <div class="row">
-                <div class="col-lg-6">
+                <div class="col-lg-8">
                     <div class="card-custom animate__animated animate__fadeInLeft">
                         <div class="card-header-custom">
                             <span><i data-lucide="edit-3"></i> Prompt Input</span>
@@ -1250,7 +1275,7 @@
                             </div>
                             <div class="mb-3">
                                 <label class="form-label-custom">Your Prompt</label>
-                                <textarea id="promptInput" class="form-control-custom" rows="18"
+                                <textarea id="promptInput" class="form-control-custom prompt-textarea-resizable" rows="18"
                                     placeholder="Enter your prompt here for evaluation..." maxlength="5000"
                                     style="min-height: 400px; font-size: 1rem; line-height: 1.6;"></textarea>
                                 <div class="d-flex justify-content-between align-items-center mt-2">
@@ -1273,7 +1298,7 @@
                     </div>
                 </div>
 
-                <div class="col-lg-6">
+                <div class="col-lg-4">
                     <div class="card-custom animate__animated animate__fadeInRight">
                         <div class="card-header-custom">
                             <span><i data-lucide="bar-chart-2"></i> Evaluation Results</span>
