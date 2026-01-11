@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Promptos - AI Prompt Engineering Platform</title>
+    <title>PromptMagic - AI Prompt Engineering Platform</title>
 
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -1223,7 +1223,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark navbar-custom sticky-top">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">
-                <i data-lucide="sparkles"></i> Promptos
+                <i data-lucide="sparkles"></i> PromptMagic
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -1979,7 +1979,7 @@
                         logs: appState.logs
                     };
                     blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-                    filename = `promptos-logs-${timestamp}.json`;
+                    filename = `promptmagic-logs-${timestamp}.json`;
                 } else if (format === 'csv') {
                     let csv = 'Timestamp,Level,Category,Message,Metadata\n';
                     appState.logs.forEach(log => {
@@ -1987,9 +1987,9 @@
                         csv += `"${log.timestamp}","${log.levelName}","${log.category}","${log.message.replace(/"/g, '""')}","${metadataStr}"\n`;
                     });
                     blob = new Blob([csv], { type: 'text/csv' });
-                    filename = `promptos-logs-${timestamp}.csv`;
+                    filename = `promptmagic-logs-${timestamp}.csv`;
                 } else if (format === 'txt') {
-                    let txt = `Promptos Event Logs\nExported: ${new Date().toISOString()}\nTotal Entries: ${appState.logs.length}\n\n`;
+                    let txt = `PromptMagic Event Logs\nExported: ${new Date().toISOString()}\nTotal Entries: ${appState.logs.length}\n\n`;
                     txt += '='.repeat(80) + '\n\n';
                     appState.logs.forEach(log => {
                         txt += `[${log.timestamp}] [${log.levelName}] [${log.category}]\n`;
@@ -2000,7 +2000,7 @@
                         txt += '-'.repeat(80) + '\n\n';
                     });
                     blob = new Blob([txt], { type: 'text/plain' });
-                    filename = `promptos-logs-${timestamp}.txt`;
+                    filename = `promptmagic-logs-${timestamp}.txt`;
                 }
 
                 const url = URL.createObjectURL(blob);
@@ -2110,7 +2110,7 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `promptos-backup-${Date.now()}.json`;
+            a.download = `promptmagic-backup-${Date.now()}.json`;
             a.click();
             URL.revokeObjectURL(url);
 
@@ -3430,7 +3430,7 @@ Make the prompt:
         }
 
         function exportAsMarkdown() {
-            let markdown = '# Promptos Evaluation History\n\n';
+            let markdown = '# PromptMagic Evaluation History\n\n';
             markdown += `Generated: ${new Date().toLocaleString()}\n\n`;
             markdown += '---\n\n';
 
@@ -3461,7 +3461,7 @@ Make the prompt:
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `promptos-history-${Date.now()}.md`;
+            a.download = `promptmagic-history-${Date.now()}.md`;
             a.click();
             URL.revokeObjectURL(url);
 
@@ -3479,7 +3479,7 @@ Make the prompt:
 
             // Title
             doc.setFontSize(20);
-            doc.text('Promptos Evaluation History', margin, yPos);
+            doc.text('PromptMagic Evaluation History', margin, yPos);
             yPos += 10;
 
             doc.setFontSize(10);
@@ -3521,7 +3521,7 @@ Make the prompt:
                 yPos += 5;
             });
 
-            doc.save(`promptos-history-${Date.now()}.pdf`);
+            doc.save(`promptmagic-history-${Date.now()}.pdf`);
             showToast('Exported', 'History exported as PDF', 'success');
         }
 

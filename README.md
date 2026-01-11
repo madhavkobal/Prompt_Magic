@@ -1,4 +1,4 @@
-# Promptos - AI Prompt Engineering Platform
+# PromptMagic - AI Prompt Engineering Platform
 
 **Version 2.0** | **Single-File Application** | **Dual LLM Support**
 
@@ -6,7 +6,7 @@
 
 ## 🚀 Quick Start
 
-Promptos is an AI-powered prompt engineering platform that helps you create, evaluate, and improve prompts for Large Language Models.
+PromptMagic is an AI-powered prompt engineering platform that helps you create, evaluate, and improve prompts for Large Language Models.
 
 ### Features
 
@@ -37,7 +37,7 @@ The user guide includes:
 
 ### 1. Open the Application
 
-Open `index.html` or `promptos-with-logging.html` in your web browser.
+Open `index.html` or `promptmagic-with-logging.html` in your web browser.
 
 ### 2. Configure Your LLM Provider
 
@@ -117,7 +117,7 @@ Open `index.html` or `promptos-with-logging.html` in your web browser.
 
 ---
 
-## 💡 Why Promptos?
+## 💡 Why PromptMagic?
 
 ### For Google Gemini Users
 ✅ Access to latest cutting-edge models
@@ -173,7 +173,7 @@ Style: Use simple language, avoid jargon, include 1-2 statistics
 | File | Description |
 |------|-------------|
 | `index.html` | Main application (single-file, complete) |
-| `promptos-with-logging.html` | User-accessible copy |
+| `promptmagic-with-logging.html` | User-accessible copy |
 | `USER_GUIDE.md` | Comprehensive documentation (90+ pages) |
 | `README.md` | This file - quick overview |
 | `UX_UI_EVALUATION.md` | UX/UI analysis and improvements |

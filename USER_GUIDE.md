@@ -1,4 +1,4 @@
-# Promptos User Guide
+# PromptMagic User Guide
 
 **Version:** 2.0
 **Last Updated:** January 2026
@@ -28,9 +28,9 @@
 
 ## Introduction
 
-### What is Promptos?
+### What is PromptMagic?
 
-Promptos is an AI-powered prompt engineering platform designed to help you create, evaluate, and improve prompts for Large Language Models (LLMs). Whether you're crafting prompts for Google Gemini or running local models with Ollama, Promptos provides intelligent analysis and actionable feedback to enhance prompt quality.
+PromptMagic is an AI-powered prompt engineering platform designed to help you create, evaluate, and improve prompts for Large Language Models (LLMs). Whether you're crafting prompts for Google Gemini or running local models with Ollama, PromptMagic provides intelligent analysis and actionable feedback to enhance prompt quality.
 
 ### Key Features
 
@@ -43,7 +43,7 @@ Promptos is an AI-powered prompt engineering platform designed to help you creat
 - ✅ **Favorites** - Bookmark your best prompts
 - ✅ **Responsive Design** - Works on desktop, tablet, and mobile
 
-### Who Should Use Promptos?
+### Who Should Use PromptMagic?
 
 - **AI Engineers** - Optimize prompts for production systems
 - **Content Creators** - Craft better prompts for AI writing tools
@@ -65,7 +65,7 @@ Promptos is an AI-powered prompt engineering platform designed to help you creat
 
 1. Open your web browser
 2. Navigate to the application file:
-   - File path: `file:///home/user/promptos-with-logging.html`
+   - File path: `file:///home/user/promptmagic-with-logging.html`
    - Or open the `index.html` file from your installation directory
 
 ### First-Time Setup
@@ -80,7 +80,7 @@ Promptos is an AI-powered prompt engineering platform designed to help you creat
 
 ## LLM Provider Setup
 
-Promptos supports two LLM providers: **Google Gemini** (cloud-based) and **Ollama** (local).
+PromptMagic supports two LLM providers: **Google Gemini** (cloud-based) and **Ollama** (local).
 
 ### Google Gemini Setup
 
@@ -91,9 +91,9 @@ Promptos supports two LLM providers: **Google Gemini** (cloud-based) and **Ollam
 3. Click **"Create API Key"**
 4. Copy the generated API key
 
-#### Step 2: Configure Promptos
+#### Step 2: Configure PromptMagic
 
-1. Open **Settings** in Promptos
+1. Open **Settings** in PromptMagic
 2. Select **"Google Gemini (Cloud)"** as LLM Provider
 3. Paste your API key in the **"Google Gemini API Key"** field
 4. Choose a Gemini model:
@@ -150,9 +150,9 @@ ollama serve
 
 You should see: `Listening on http://localhost:11434`
 
-#### Step 4: Configure Promptos
+#### Step 4: Configure PromptMagic
 
-1. Open **Settings** in Promptos
+1. Open **Settings** in PromptMagic
 2. Select **"Ollama (Local)"** as LLM Provider
 3. Verify **Ollama Endpoint URL**: `http://localhost:11434`
 4. Click the **Refresh** button to fetch installed models
@@ -161,7 +161,7 @@ You should see: `Listening on http://localhost:11434`
 
 #### Supported Ollama Models
 
-Promptos includes presets for popular models:
+PromptMagic includes presets for popular models:
 
 | Model Family | Sizes | Best For |
 |--------------|-------|----------|
@@ -505,7 +505,7 @@ The prompt input box supports dynamic resizing:
 
 ### Caching System
 
-Promptos caches API responses for performance:
+PromptMagic caches API responses for performance:
 
 - **Cache duration:** 1 hour
 - **Cache size:** 20 entries
@@ -682,7 +682,7 @@ Click navigation links or use mouse to switch sections:
 1. Open terminal
 2. Run: `ollama serve`
 3. Verify output shows: "Listening on http://localhost:11434"
-4. Retry in Promptos
+4. Retry in PromptMagic
 
 #### "No Models Found" When Refreshing
 
@@ -692,7 +692,7 @@ Click navigation links or use mouse to switch sections:
 1. Open terminal
 2. Pull a model: `ollama pull llama3.3:70b`
 3. Wait for download to complete
-4. Click "Refresh" in Promptos Settings
+4. Click "Refresh" in PromptMagic Settings
 
 #### Ollama Endpoint Not Accessible
 
@@ -771,7 +771,7 @@ Click navigation links or use mouse to switch sections:
 1. Go to **Settings**
 2. Click **"Export All Data"**
 3. Choose save location
-4. File saved as: `promptos-data-[timestamp].json`
+4. File saved as: `promptmagic-data-[timestamp].json`
 
 ### Importing Data
 
@@ -828,16 +828,16 @@ All data is stored locally in your browser using localStorage:
 
 API keys are obfuscated before storage and never logged.
 
-### Can I use Promptos offline?
+### Can I use PromptMagic offline?
 
 **Partially:**
 - **With Gemini:** No - requires internet for API calls
 - **With Ollama:** Yes - fully offline after initial setup
 - **UI access:** Yes - the application works offline for viewing history, templates, etc.
 
-### How much does Promptos cost?
+### How much does PromptMagic cost?
 
-**Promptos is free.** However:
+**PromptMagic is free.** However:
 - **Google Gemini:** May have API costs after free tier (check Google's pricing)
 - **Ollama:** Completely free, but requires local compute resources
 
@@ -874,7 +874,7 @@ Scores are AI-generated assessments based on prompt engineering best practices. 
 - Structure and organization
 - Model-specific optimization
 
-### Can I contribute to Promptos?
+### Can I contribute to PromptMagic?
 
 This is a single-file application. You can:
 - Suggest features
