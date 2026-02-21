@@ -1204,6 +1204,157 @@
                 font-size: 2rem;
             }
         }
+
+        /* ==================== PROVIDER BADGE ==================== */
+        .provider-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            background: rgba(0, 217, 255, 0.12);
+            color: var(--accent-primary);
+            border: 1px solid rgba(0, 217, 255, 0.3);
+            border-radius: 12px;
+            padding: 0.15rem 0.6rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            vertical-align: middle;
+            margin-left: 0.5rem;
+        }
+
+        .provider-badge.ollama {
+            background: rgba(0, 255, 136, 0.12);
+            color: var(--accent-success);
+            border-color: rgba(0, 255, 136, 0.3);
+        }
+
+        /* ==================== HISTORY NAV BADGE ==================== */
+        .nav-count-badge {
+            display: inline-block;
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+            border-radius: 10px;
+            padding: 0.05rem 0.45rem;
+            font-size: 0.65rem;
+            font-weight: 700;
+            margin-left: 0.3rem;
+            vertical-align: middle;
+            line-height: 1.4;
+        }
+
+        /* ==================== SCORE MINI BAR (History) ==================== */
+        .score-mini-bar {
+            height: 3px;
+            background: var(--border-color);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+            width: 100%;
+        }
+
+        .score-mini-bar-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.8s ease;
+        }
+
+        /* ==================== EVALUATE LAYOUT TOGGLE ==================== */
+        .evaluate-layout-stacked {
+            display: block;
+        }
+
+        .evaluate-layout-split {
+            display: flex;
+            gap: 1.5rem;
+            align-items: flex-start;
+        }
+
+        .evaluate-layout-split > .row {
+            flex: 1;
+            min-width: 0;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+            margin-top: 0 !important;
+        }
+
+        @media (max-width: 992px) {
+            .evaluate-layout-split {
+                display: block;
+            }
+            .evaluate-layout-split > .row + .row {
+                margin-top: 1.5rem !important;
+            }
+        }
+
+        .layout-toggle-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            color: white;
+            padding: 0.3rem 0.7rem;
+            cursor: pointer;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            transition: all var(--transition-speed);
+            white-space: nowrap;
+        }
+
+        .layout-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* ==================== CLEAR BUTTON SEPARATOR ==================== */
+        .btn-group-separator {
+            width: 1px;
+            background: var(--border-color);
+            margin: 0.25rem 0.25rem;
+            align-self: stretch;
+        }
+
+        .btn-clear-action:hover {
+            border-color: var(--accent-danger) !important;
+            color: var(--accent-danger) !important;
+        }
+
+        /* ==================== API KEY SHOW/HIDE TOGGLE ==================== */
+        .input-with-toggle {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .input-with-toggle .form-control-custom {
+            flex: 1;
+        }
+
+        .btn-icon-only {
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            padding: 0.5rem 0.75rem;
+            cursor: pointer;
+            transition: all var(--transition-speed);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            min-height: 44px;
+        }
+
+        .btn-icon-only:hover {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        /* ==================== COPY BUTTON SUCCESS STATE ==================== */
+        .copy-btn.copied {
+            background: var(--accent-success);
+            border-color: var(--accent-success);
+            color: white;
+            opacity: 1;
+        }
     </style>
 </head>
 <body data-theme="sleek-dark">
@@ -1224,6 +1375,7 @@
         <div class="container-fluid">
             <a class="navbar-brand" href="#">
                 <i data-lucide="sparkles"></i> PromptMagic
+                <span id="providerBadge" class="provider-badge">Gemini</span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -1243,9 +1395,10 @@
                     <li class="nav-item">
                         <a class="nav-link" href="#" onclick="showSection('history')">
                             <i data-lucide="history"></i> History
+                            <span id="historyNavBadge" class="nav-count-badge" style="display:none;"></span>
                         </a>
                     </li>
-                    <li class="nav-item">
+                    <li class="nav-item" id="logsNavItem">
                         <a class="nav-link" href="#" onclick="showSection('logs')">
                             <i data-lucide="file-text"></i> Logs
                         </a>
@@ -1264,11 +1417,15 @@
 
         <!-- ==================== EVALUATE SECTION ==================== -->
         <div id="evaluate-section" class="section-content">
+            <div id="evaluateLayout" class="evaluate-layout-stacked">
             <div class="row">
                 <div class="col-12">
                     <div class="card-custom animate__animated animate__fadeInLeft">
                         <div class="card-header-custom">
                             <span><i data-lucide="edit-3"></i> Prompt Input</span>
+                            <button class="layout-toggle-btn" id="layoutToggleBtn" onclick="toggleEvaluateLayout()" title="Switch to side-by-side layout">
+                                <i data-lucide="columns"></i> Side-by-side
+                            </button>
                         </div>
                         <div class="card-body p-4">
                             <div class="mb-3">
@@ -1282,14 +1439,15 @@
                                     <small class="text-muted">Press Ctrl+Enter to evaluate</small>
                                 </div>
                             </div>
-                            <div class="d-flex gap-2 flex-wrap">
+                            <div class="d-flex gap-2 flex-wrap align-items-center">
                                 <button class="btn-primary-custom btn-icon" onclick="evaluatePrompt()">
                                     <i data-lucide="search"></i> Evaluate Prompt
                                 </button>
                                 <button class="btn-secondary-custom btn-icon" onclick="improvePrompt()">
                                     <i data-lucide="wand-2"></i> Improve Prompt
                                 </button>
-                                <button class="btn-secondary-custom btn-icon" onclick="clearInput()">
+                                <div class="btn-group-separator"></div>
+                                <button class="btn-secondary-custom btn-icon btn-clear-action" onclick="clearInput()">
                                     <i data-lucide="x"></i> Clear
                                 </button>
                             </div>
@@ -1307,14 +1465,17 @@
                         <div class="card-body p-4">
                             <div id="evaluationResults" role="status" aria-live="polite" aria-atomic="true">
                                 <div class="text-center text-muted py-5">
-                                    <i data-lucide="info" style="width: 48px; height: 48px; margin-bottom: 1rem;"></i>
-                                    <p>Enter a prompt and click "Evaluate Prompt" to see results.</p>
+                                    <i data-lucide="zap" style="width: 48px; height: 48px; margin-bottom: 1rem; color: var(--accent-primary); opacity: 0.4;"></i>
+                                    <p>Enter your prompt above and click <strong>Evaluate Prompt</strong> to see quality scores and feedback.</p>
+                                    <small>Or try <strong>Improve Prompt</strong> to get an AI-enhanced version.</small>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            </div> <!-- /evaluateLayout -->
 
             <!-- Improvement Results (Hidden by default) -->
             <div id="improvementSection" style="display: none;">
@@ -1565,8 +1726,13 @@
                     <div id="geminiSettings">
                         <div class="mb-4">
                             <label class="form-label-custom">Google Gemini API Key</label>
-                            <input type="password" id="apiKeyInput" class="form-control-custom"
-                                placeholder="Enter your API key">
+                            <div class="input-with-toggle">
+                                <input type="password" id="apiKeyInput" class="form-control-custom"
+                                    placeholder="Enter your API key">
+                                <button type="button" class="btn-icon-only" onclick="toggleApiKeyVisibility()" id="apiKeyToggleBtn" title="Show/hide API key" aria-label="Toggle API key visibility">
+                                    <i data-lucide="eye" id="apiKeyToggleIcon" style="width: 18px; height: 18px;"></i>
+                                </button>
+                            </div>
                             <small class="text-muted">Get your API key from <a href="https://makersuite.google.com/app/apikey" target="_blank">Google AI Studio</a></small>
                         </div>
 
@@ -1654,6 +1820,17 @@
                             </button>
                         </div>
                         <small class="text-muted">Backup or restore your templates and history</small>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label-custom">Developer Options</label>
+                        <div class="form-check form-switch" style="padding-left: 2.5rem;">
+                            <input class="form-check-input" type="checkbox" id="showLogsNav" checked style="cursor: pointer;">
+                            <label class="form-check-label" for="showLogsNav" style="color: var(--text-secondary); cursor: pointer;">
+                                Show Event Logs in navigation
+                            </label>
+                        </div>
+                        <small class="text-muted">Hide the Logs section for a cleaner navigation experience</small>
                     </div>
                 </div>
                 <div class="modal-footer modal-footer-custom">
@@ -1764,6 +1941,15 @@
             TOAST_DURATION: 5000,
             MAX_LOG_ENTRIES: 1000, // Maximum log entries to keep
             LOG_RETENTION_DAYS: 7 // Days to keep logs
+        };
+
+        // Template category icons (maps to Lucide icon names)
+        const CATEGORY_ICONS = {
+            Creative: 'palette',
+            Business: 'briefcase',
+            Coding: 'code-2',
+            Education: 'book-open',
+            Data: 'bar-chart-2'
         };
 
         // Log levels
@@ -2056,13 +2242,114 @@
         async function copyToClipboard(elementId) {
             const element = document.getElementById(elementId);
             const text = element.textContent;
+            const btn = event?.currentTarget || event?.target?.closest('.copy-btn');
 
             try {
                 await navigator.clipboard.writeText(text);
                 showToast('Copied!', 'Text copied to clipboard', 'success');
+
+                // Visual feedback: swap icon to checkmark briefly
+                if (btn) {
+                    const icon = btn.querySelector('[data-lucide]');
+                    if (icon) {
+                        btn.classList.add('copied');
+                        icon.setAttribute('data-lucide', 'check');
+                        lucide.createIcons();
+                        setTimeout(() => {
+                            icon.setAttribute('data-lucide', 'copy');
+                            btn.classList.remove('copied');
+                            lucide.createIcons();
+                        }, 1500);
+                    }
+                }
             } catch (err) {
                 showToast('Error', 'Failed to copy text', 'error');
             }
+        }
+
+        // ==================== PROVIDER BADGE ====================
+
+        function updateProviderBadge() {
+            const badge = document.getElementById('providerBadge');
+            if (!badge) return;
+            const isOllama = appState.llmProvider === 'ollama';
+            badge.textContent = isOllama
+                ? `Ollama · ${appState.ollamaModel.split(':')[0]}`
+                : `Gemini · ${appState.geminiModel.replace('gemini-', '').replace('-preview', '')}`;
+            badge.className = 'provider-badge' + (isOllama ? ' ollama' : '');
+        }
+
+        // ==================== HISTORY NAV BADGE ====================
+
+        function updateHistoryNavBadge() {
+            const badge = document.getElementById('historyNavBadge');
+            if (!badge) return;
+            const count = appState.history.length;
+            if (count > 0) {
+                badge.textContent = count > 99 ? '99+' : count;
+                badge.style.display = 'inline-block';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        // ==================== API KEY VISIBILITY TOGGLE ====================
+
+        function toggleApiKeyVisibility() {
+            const input = document.getElementById('apiKeyInput');
+            const icon = document.getElementById('apiKeyToggleIcon');
+            const isPassword = input.type === 'password';
+            input.type = isPassword ? 'text' : 'password';
+            icon.setAttribute('data-lucide', isPassword ? 'eye-off' : 'eye');
+            lucide.createIcons();
+        }
+
+        // ==================== EVALUATE LAYOUT TOGGLE ====================
+
+        function toggleEvaluateLayout() {
+            const layout = document.getElementById('evaluateLayout');
+            const btn = document.getElementById('layoutToggleBtn');
+            const isSplit = layout.classList.contains('evaluate-layout-split');
+
+            if (isSplit) {
+                layout.classList.replace('evaluate-layout-split', 'evaluate-layout-stacked');
+                btn.innerHTML = '<i data-lucide="columns"></i> Side-by-side';
+                btn.title = 'Switch to side-by-side layout';
+            } else {
+                layout.classList.replace('evaluate-layout-stacked', 'evaluate-layout-split');
+                btn.innerHTML = '<i data-lucide="layout-list"></i> Stacked';
+                btn.title = 'Switch to stacked layout';
+            }
+            lucide.createIcons();
+            localStorage.setItem('evaluate_layout', isSplit ? 'stacked' : 'split');
+        }
+
+        // ==================== SCORE ANIMATION ====================
+
+        function animateScore(scoreEl, circleEl, targetScore, duration = 1200) {
+            const start = performance.now();
+            function update(timestamp) {
+                const elapsed = timestamp - start;
+                const progress = Math.min(elapsed / duration, 1);
+                const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+                const current = Math.round(eased * targetScore);
+                scoreEl.textContent = current;
+                circleEl.style.setProperty('--score', current);
+                if (progress < 1) requestAnimationFrame(update);
+            }
+            requestAnimationFrame(update);
+        }
+
+        // ==================== LOGS NAV TOGGLE ====================
+
+        function toggleLogsNav(forceVisible) {
+            const logsNavItem = document.getElementById('logsNavItem');
+            const checkbox = document.getElementById('showLogsNav');
+            if (!logsNavItem) return;
+            const visible = forceVisible !== undefined ? forceVisible : (checkbox ? checkbox.checked : true);
+            logsNavItem.style.display = visible ? '' : 'none';
+            if (checkbox && forceVisible !== undefined) checkbox.checked = visible;
+            localStorage.setItem('show_logs_nav', visible ? '1' : '0');
         }
 
         // ==================== OFFLINE DETECTION ====================
@@ -2215,7 +2502,8 @@
             const promptInput = document.getElementById('promptInput');
             const charCount = document.getElementById('charCount');
             const count = promptInput.value.length;
-            charCount.textContent = `${count} / ${CONFIG.MAX_PROMPT_LENGTH} characters`;
+            const words = promptInput.value.trim() ? promptInput.value.trim().split(/\s+/).length : 0;
+            charCount.textContent = `${count} / ${CONFIG.MAX_PROMPT_LENGTH} characters  ·  ~${words} words`;
 
             if (count > CONFIG.MAX_PROMPT_LENGTH * 0.9) {
                 charCount.style.color = 'var(--accent-warning)';
@@ -2279,6 +2567,31 @@
             // Render initial views
             renderTemplates();
             renderHistory();
+
+            // Initialize provider badge
+            updateProviderBadge();
+
+            // Initialize history nav badge
+            updateHistoryNavBadge();
+
+            // Initialize logs nav visibility from saved preference
+            const savedLogsNav = localStorage.getItem('show_logs_nav');
+            const showLogsNavCheckbox = document.getElementById('showLogsNav');
+            if (savedLogsNav === '0') {
+                toggleLogsNav(false);
+                if (showLogsNavCheckbox) showLogsNavCheckbox.checked = false;
+            }
+
+            // Initialize evaluate layout from saved preference
+            const savedLayout = localStorage.getItem('evaluate_layout');
+            if (savedLayout === 'split') {
+                const layout = document.getElementById('evaluateLayout');
+                const btn = document.getElementById('layoutToggleBtn');
+                layout.classList.replace('evaluate-layout-stacked', 'evaluate-layout-split');
+                btn.innerHTML = '<i data-lucide="layout-list"></i> Stacked';
+                btn.title = 'Switch to stacked layout';
+                setTimeout(() => lucide.createIcons(), 50);
+            }
         });
 
         // ==================== NAVIGATION ====================
@@ -2311,7 +2624,8 @@
             // Log navigation
             Logger.info(LOG_CATEGORY.USER_ACTION, `Navigated to ${section} section`);
 
-            // Reinitialize icons
+            // Update history badge and reinitialize icons
+            updateHistoryNavBadge();
             setTimeout(() => lucide.createIcons(), 100);
         }
 
@@ -2786,8 +3100,8 @@ Consider:
 
             const resultsHTML = `
                 <div class="score-container ${scoreLevel === 'critical' ? 'score-critical' : ''}">
-                    <div class="score-circle" style="--score: ${evaluation.score}" data-score-level="${scoreLevel}">
-                        <div class="score-value" data-score-level="${scoreLevel}">${evaluation.score}</div>
+                    <div class="score-circle" style="--score: 0" data-score-level="${scoreLevel}">
+                        <div class="score-value" data-score-level="${scoreLevel}" id="scoreValueEl">0</div>
                     </div>
                     <div class="score-label">Quality Score for ${targetModel}</div>
                     <div class="score-status status-${scoreLevel}">
@@ -2827,6 +3141,15 @@ Consider:
 
             document.getElementById('evaluationResults').innerHTML = resultsHTML;
             lucide.createIcons();
+
+            // Animate the score circle and number
+            const scoreEl = document.getElementById('scoreValueEl');
+            const circleEl = document.getElementById('evaluationResults').querySelector('.score-circle');
+            if (scoreEl && circleEl) animateScore(scoreEl, circleEl, evaluation.score);
+
+            // Auto-scroll to results card
+            const resultsCard = document.getElementById('evaluationResults').closest('.card-custom');
+            if (resultsCard) setTimeout(() => resultsCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
         }
 
         // ==================== PROMPT IMPROVEMENT ====================
@@ -3022,23 +3345,29 @@ Make the prompt:
             if (filtered.length === 0) {
                 container.innerHTML = `
                     <div class="col-12 text-center text-muted py-5">
-                        <i data-lucide="inbox" style="width: 48px; height: 48px; margin-bottom: 1rem;"></i>
-                        <p>No templates found.</p>
+                        <i data-lucide="search" style="width: 48px; height: 48px; margin-bottom: 1rem; opacity: 0.4;"></i>
+                        <p>No templates match your search.</p>
+                        <small><a href="#" onclick="document.getElementById('templateSearch').value='';document.getElementById('categoryFilter').value='';filterTemplates();return false;" style="color: var(--accent-primary);">Clear search</a> or <a href="#" onclick="openCreateTemplateModal();return false;" style="color: var(--accent-primary);">create a new template</a>.</small>
                     </div>
                 `;
                 lucide.createIcons();
                 return;
             }
 
-            container.innerHTML = filtered.map(template => `
+            container.innerHTML = filtered.map(template => {
+                const catIcon = CATEGORY_ICONS[template.category] || 'file-text';
+                return `
                 <div class="col-md-6 col-lg-4">
                     <div class="template-card" onclick="openTemplateModal(${template.id})">
-                        <div class="template-category">${template.category}</div>
+                        <div class="template-category">
+                            <i data-lucide="${catIcon}" style="width:12px;height:12px;vertical-align:middle;margin-right:4px;"></i>${template.category}
+                        </div>
                         <div class="template-title">${template.name}</div>
                         <div class="template-description">${template.description}</div>
                     </div>
                 </div>
-            `).join('');
+                `;
+            }).join('');
 
             lucide.createIcons();
         }
@@ -3315,8 +3644,9 @@ Make the prompt:
             if (filtered.length === 0) {
                 container.innerHTML = `
                     <div class="text-center text-muted py-5">
-                        <i data-lucide="inbox" style="width: 48px; height: 48px; margin-bottom: 1rem;"></i>
-                        <p>No matching items found.</p>
+                        <i data-lucide="filter-x" style="width: 48px; height: 48px; margin-bottom: 1rem; opacity: 0.4;"></i>
+                        <p>No history items match your filters.</p>
+                        <small><a href="#" onclick="clearFilters();return false;" style="color: var(--accent-primary);">Clear filters</a> to see all items.</small>
                     </div>
                 `;
                 lucide.createIcons();
@@ -3330,6 +3660,7 @@ Make the prompt:
                 // SECURITY FIX: Sanitize user input to prevent XSS
                 const sanitizedPrompt = sanitizeForDisplay(item.prompt, 100);
 
+                const barColor = item.score >= 80 ? 'var(--accent-success)' : item.score >= 60 ? 'var(--accent-warning)' : 'var(--accent-danger)';
                 return `
                     <div class="history-item">
                         <div class="history-content">
@@ -3341,6 +3672,9 @@ Make the prompt:
                                 <span class="badge badge-custom badge-${scoreClass}">Score: ${item.score}</span>
                                 <span class="ms-2">${escapeHTML(item.targetModel)}</span>
                                 <span class="ms-2">${escapeHTML(date)}</span>
+                            </div>
+                            <div class="score-mini-bar">
+                                <div class="score-mini-bar-fill" style="width: ${item.score}%; background: ${barColor};"></div>
                             </div>
                         </div>
                         <div class="history-actions">
@@ -3366,8 +3700,9 @@ Make the prompt:
                 const container = document.getElementById('historyContainer');
                 container.innerHTML = `
                     <div class="text-center text-muted py-5">
-                        <i data-lucide="inbox" style="width: 48px; height: 48px; margin-bottom: 1rem;"></i>
-                        <p>No evaluation history yet.</p>
+                        <i data-lucide="clock" style="width: 48px; height: 48px; margin-bottom: 1rem; opacity: 0.4;"></i>
+                        <p>No evaluations yet.</p>
+                        <small>Go to <a href="#" onclick="showSection('evaluate');return false;" style="color: var(--accent-primary);">Evaluate</a> to score your first prompt.</small>
                     </div>
                 `;
                 document.getElementById('historyCount').textContent = 'Showing 0 of 0 items';
@@ -3590,6 +3925,13 @@ Make the prompt:
                 });
             }
 
+            // Save logs nav toggle preference
+            const showLogsNav = document.getElementById('showLogsNav')?.checked !== false;
+            toggleLogsNav(showLogsNav);
+
+            // Update provider badge to reflect any changes
+            updateProviderBadge();
+
             bootstrap.Modal.getInstance(document.getElementById('settingsModal')).hide();
             showToast('Saved', 'Settings saved successfully', 'success');
         }
@@ -3769,10 +4111,16 @@ Make the prompt:
             countElement.textContent = `Showing ${filtered.length} of ${appState.logs.length} logs`;
 
             if (filtered.length === 0) {
+                const noLogsMsg = appState.logs.length === 0
+                    ? 'No logs recorded yet — logs appear after your first evaluation.'
+                    : 'No logs match the current filters.';
+                const clearLink = appState.logs.length > 0
+                    ? `<br><small><a href="#" onclick="clearLogFilters();return false;" style="color: var(--accent-primary);">Clear filters</a> to see all logs.</small>`
+                    : '';
                 container.innerHTML = `
                     <div class="text-center text-muted py-5">
-                        <i data-lucide="inbox" style="width: 48px; height: 48px; margin-bottom: 1rem;"></i>
-                        <p>No log entries found.</p>
+                        <i data-lucide="terminal" style="width: 48px; height: 48px; margin-bottom: 1rem; opacity: 0.4;"></i>
+                        <p>${noLogsMsg}</p>${clearLink}
                     </div>
                 `;
                 lucide.createIcons();
