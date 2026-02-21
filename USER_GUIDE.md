@@ -1,7 +1,7 @@
 # PromptMagic User Guide
 
-**Version:** 2.0
-**Last Updated:** January 2026
+**Version:** 3.0
+**Last Updated:** February 2026
 
 ---
 
@@ -18,11 +18,17 @@
    - [Templates](#templates)
    - [History](#history)
    - [Event Logs](#event-logs)
-5. [Advanced Features](#advanced-features)
-6. [Keyboard Shortcuts](#keyboard-shortcuts)
+5. [Productivity Features](#productivity-features)
+   - [Auto-Save Draft](#auto-save-draft)
+   - [Results Action Bar](#results-action-bar)
+   - [Keyboard Shortcuts](#keyboard-shortcuts)
+   - [Theme Quick Toggle](#theme-quick-toggle)
+   - [Prompt Quick Tips](#prompt-quick-tips)
+6. [Settings Reference](#settings-reference)
 7. [Tips & Best Practices](#tips--best-practices)
 8. [Troubleshooting](#troubleshooting)
 9. [Data Management](#data-management)
+10. [FAQ](#faq)
 
 ---
 
@@ -34,22 +40,43 @@ PromptMagic is an AI-powered prompt engineering platform designed to help you cr
 
 ### Key Features
 
-- ✅ **Dual LLM Support** - Works with both Google Gemini (cloud) and Ollama (local)
-- ✅ **Prompt Evaluation** - Get detailed quality scores and feedback
-- ✅ **Automatic Improvement** - AI-powered prompt enhancement suggestions
-- ✅ **Template Library** - Save and reuse your best prompts
-- ✅ **History Tracking** - Keep track of all evaluations
-- ✅ **Event Logging** - Comprehensive system activity logs
-- ✅ **Favorites** - Bookmark your best prompts
-- ✅ **Responsive Design** - Works on desktop, tablet, and mobile
+**Core evaluation and workflow**
+- **Dual LLM Support** — Works with Google Gemini (cloud) and Ollama (local)
+- **Prompt Evaluation** — Quality scores (0–100) with feedback, strengths, and improvement areas
+- **Automatic Improvement** — AI rewrites your prompt with full reasoning
+- **Template Library** — Save, categorize, and reuse prompts
+- **History Tracking** — Every evaluation logged with favorites and re-run
+- **Event Logging** — 5 levels, 7 categories, filterable and exportable
+
+**UX enhancements (Batch 1)**
+- First-run onboarding banner for new users
+- Keyboard shortcut reference panel (`?`)
+- History stats bar + score sparkline chart
+- Ollama one-click connection test
+- OS dark/light theme auto-detection
+- localStorage usage indicator in Settings
+- Collapsible prompt engineering tips panel
+- Dynamic history model filter
+
+**UX enhancements (Batch 2)**
+- Auto-save draft — textarea content survives page reloads
+- Navbar moon/sun toggle for instant theme switching
+- History sort by date or score
+- Save any evaluated prompt as a template in one click
+- Copy evaluation result as formatted Markdown
+- API duration badge on evaluation results
+- History capacity progress bar with color warnings
+- Configurable history limit (25 / 50 / 100 / 200)
+- History date range filter (Today / 7 days / 30 days)
+- "Use Improved Version" button on improvement results
 
 ### Who Should Use PromptMagic?
 
-- **AI Engineers** - Optimize prompts for production systems
-- **Content Creators** - Craft better prompts for AI writing tools
-- **Developers** - Test and refine prompts for AI integrations
-- **Researchers** - Analyze prompt effectiveness systematically
-- **Students** - Learn best practices in prompt engineering
+- **AI Engineers** — Optimize prompts for production systems
+- **Content Creators** — Craft better prompts for AI writing tools
+- **Developers** — Test and refine prompts for AI integrations
+- **Researchers** — Analyze prompt effectiveness systematically
+- **Students** — Learn best practices in prompt engineering
 
 ---
 
@@ -59,28 +86,25 @@ PromptMagic is an AI-powered prompt engineering platform designed to help you cr
 
 - Modern web browser (Chrome, Firefox, Safari, Edge)
 - Internet connection (for Google Gemini)
-- For Ollama: Local installation of Ollama
+- For Ollama: local Ollama installation + sufficient RAM for the chosen model
 
 ### Opening the Application
 
-1. Open your web browser
-2. Navigate to the application file:
-   - File path: `file:///home/user/promptmagic-with-logging.html`
-   - Or open the `index.html` file from your installation directory
+Open `index.html` in your web browser directly from the file system.
 
 ### First-Time Setup
 
-1. Click the **Settings** icon in the top navigation bar
-2. Choose your preferred LLM provider
-3. Configure provider-specific settings (see [LLM Provider Setup](#llm-provider-setup))
-4. Select your preferred theme
+On your first visit, PromptMagic shows an **onboarding banner** with setup instructions. It disappears automatically when you save valid settings.
+
+1. Click **Settings** (or the gear icon) in the navbar
+2. Choose your LLM provider (Gemini or Ollama)
+3. Configure provider-specific settings (see below)
+4. Optionally set your preferred theme
 5. Click **Save Settings**
 
 ---
 
 ## LLM Provider Setup
-
-PromptMagic supports two LLM providers: **Google Gemini** (cloud-based) and **Ollama** (local).
 
 ### Google Gemini Setup
 
@@ -89,105 +113,76 @@ PromptMagic supports two LLM providers: **Google Gemini** (cloud-based) and **Ol
 1. Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
 2. Sign in with your Google account
 3. Click **"Create API Key"**
-4. Copy the generated API key
+4. Copy the generated key
 
 #### Step 2: Configure PromptMagic
 
-1. Open **Settings** in PromptMagic
+1. Open **Settings**
 2. Select **"Google Gemini (Cloud)"** as LLM Provider
-3. Paste your API key in the **"Google Gemini API Key"** field
-4. Choose a Gemini model:
-   - **Gemini 3 Flash (Preview)** - Fastest, good for quick evaluations
-   - **Gemini 3 Pro (Preview)** - Best quality, adaptive thinking
-   - **Gemini 2.5 Flash** - Stable, fast responses
-   - **Gemini 2.5 Pro** - Stable, high quality
-   - **Gemini 2.0 Flash** - Legacy, fast responses
+3. Paste your API key
+4. Choose a model:
+
+| Model | Speed | Quality | Use Case |
+|---|---|---|---|
+| Gemini 3 Flash (Preview) | Fastest | Good | Quick tests |
+| Gemini 3 Pro (Preview) | Moderate | Best | Production |
+| Gemini 2.5 Flash | Fast | Good | Cost-optimized |
+| Gemini 2.5 Pro | Moderate | High | Stable high quality |
+| Gemini 2.0 Flash | Fast | Good | Legacy workflows |
+
 5. Click **Save Settings**
-
-#### Model Recommendations
-
-| Use Case | Recommended Model |
-|----------|-------------------|
-| Quick testing | Gemini 3 Flash |
-| Production use | Gemini 3 Pro |
-| Cost optimization | Gemini 2.5 Flash |
-| Best quality | Gemini 3 Pro |
 
 ### Ollama Local LLM Setup
 
 #### Step 1: Install Ollama
 
-1. Visit [ollama.ai](https://ollama.ai)
-2. Download and install Ollama for your operating system
-3. Open a terminal and verify installation:
-   ```bash
-   ollama --version
-   ```
+1. Visit [ollama.ai](https://ollama.ai) and install for your OS
+2. Verify: `ollama --version`
 
 #### Step 2: Pull a Model
 
-Choose and download a model:
-
 ```bash
-# Recommended: Llama 3.3 70B (best quality)
+# Best quality (requires ~40 GB RAM)
 ollama pull llama3.3:70b
 
-# Alternative: Qwen 2.5 72B (excellent performance)
-ollama pull qwen2.5:72b
+# Good balance (~20 GB RAM)
+ollama pull qwen2.5:32b
 
-# Smaller models for lower-spec systems:
+# Light (~6 GB RAM)
 ollama pull llama3.1:8b
 ollama pull qwen2.5:7b
 ```
 
-#### Step 3: Start Ollama Service
-
-Ollama typically starts automatically. To manually start:
+#### Step 3: Start Ollama
 
 ```bash
 ollama serve
+# Output: Listening on http://localhost:11434
 ```
-
-You should see: `Listening on http://localhost:11434`
 
 #### Step 4: Configure PromptMagic
 
-1. Open **Settings** in PromptMagic
-2. Select **"Ollama (Local)"** as LLM Provider
-3. Verify **Ollama Endpoint URL**: `http://localhost:11434`
-4. Click the **Refresh** button to fetch installed models
-5. Select your model from the dropdown
-6. Click **Save Settings**
+1. Open **Settings**
+2. Select **"Ollama (Local)"**
+3. Verify endpoint: `http://localhost:11434`
+4. Click **"Test Connection"** — a green ✓ with model count confirms success
+5. Click **Refresh** to load installed models
+6. Select your model
+7. Click **Save Settings**
 
 #### Supported Ollama Models
 
-PromptMagic includes presets for popular models:
-
-| Model Family | Sizes | Best For |
-|--------------|-------|----------|
+| Model Family | Sizes | Strengths |
+|---|---|---|
 | Llama 3.x | 70B, 90B, 8B | General purpose, coding |
 | Qwen 2.5 | 72B, 32B, 14B, 7B | Multilingual, reasoning |
 | DeepSeek R1 | 70B, 32B, 14B, 8B, 7B | Advanced reasoning |
 | Mistral | 7B | Fast, efficient |
-| Mixtral | 8x7B | High quality, MoE |
-| Gemma 2 | 27B, 9B | Google model, efficient |
-| Phi 4 | 14B | Microsoft model, compact |
+| Mixtral | 8×7B | High quality, mixture-of-experts |
+| Gemma 2 | 27B, 9B | Compact Google model |
+| Phi 4 | 14B | Compact Microsoft model |
 
-#### Using Custom Models
-
-If your model isn't listed:
-
-1. Select **"Custom Model..."** from the dropdown
-2. Enter the exact model name from `ollama list`
-3. Click **Save Settings**
-
-#### Benefits of Ollama
-
-✅ **Privacy** - All processing happens locally
-✅ **No API costs** - Free after installation
-✅ **No rate limits** - Unlimited evaluations
-✅ **Offline capability** - Works without internet
-✅ **Latest models** - Access to cutting-edge open models
+For a model not listed, choose **"Custom Model..."** and enter the exact name from `ollama list`.
 
 ---
 
@@ -195,373 +190,307 @@ If your model isn't listed:
 
 ### Evaluate Prompts
 
-The Evaluate feature analyzes your prompts and provides:
-- **Quality Score** (0-100)
-- **Detailed Feedback** - Specific improvement points
-- **Strengths** - What's working well
-- **Areas for Improvement** - What to enhance
+Evaluates your prompt and returns a quality score plus structured feedback.
 
-#### How to Evaluate a Prompt
+#### How to Evaluate
 
-1. **Navigate** to the **Evaluate** section (should be default)
-2. **Enter your prompt** in the "Your Prompt" text box
-3. Click the **"Evaluate Prompt"** button
-4. **Wait** for the analysis (typically 3-10 seconds)
-5. **Review** the results in the Evaluation Results section
+1. Navigate to the **Evaluate** section
+2. Type or paste your prompt in the editor
+3. Click **"Evaluate Prompt"** (or press `Ctrl + Enter`)
+4. Wait for the analysis (typically 2–10 seconds)
+5. Review results — the **API duration badge** next to the score label shows how long it took
 
 #### Understanding the Score
 
-| Score Range | Quality Level | Meaning |
-|-------------|---------------|---------|
-| 80-100 | Excellent ✅ | Production-ready, well-crafted |
-| 60-79 | Good 👍 | Solid quality, minor improvements possible |
-| 40-59 | Needs Improvement ⚠️ | Requires significant refinement |
-| 0-39 | Critical ❌ | Major issues, immediate action required |
+| Score | Level | Meaning |
+|---|---|---|
+| 80–100 | Excellent ✅ | Production-ready |
+| 60–79 | Good 👍 | Solid, minor tweaks possible |
+| 40–59 | Needs Improvement ⚠️ | Significant refinement required |
+| 0–39 | Critical ❌ | Major issues, rewrite recommended |
 
-#### Score Display Features
+Scores are clamped to 0–100; non-numeric LLM responses default to 0 with a warning toast.
 
-- **Color-coded** indicators (green, cyan, yellow, red)
-- **Visual pulse animation** for critical scores
-- **Status badges** with descriptive text
-- **Accessibility** support with screen reader labels
+#### Results Action Bar
 
-#### Example Evaluation
+After a successful evaluation, two buttons appear below the results:
 
-**Before:**
+- **Save as Template** (bookmark icon) — prompts for a name and saves the current prompt to your template library
+- **Copy as Markdown** (copy icon) — copies the full result (score, model, date, feedback, strengths, improvements) as formatted Markdown to your clipboard
+
+#### Example
+
+**Input:**
 ```
 Write a blog post about AI
 ```
 
-**Evaluation Results:**
-- **Score:** 35/100 (Critical)
-- **Feedback:**
-  - Too vague - no specific topic within AI
-  - Missing target audience
-  - No tone or style specification
-  - No length or format requirements
+**Evaluation:**
+- Score: 35/100 (Critical)
+- Feedback: too vague, no audience, no length, no structure specified
 
-**After Evaluation, You Know:**
-- Add specificity (e.g., "AI in healthcare")
-- Define audience (e.g., "for non-technical readers")
-- Specify tone (e.g., "informative and accessible")
-- Set constraints (e.g., "800 words, 3 sections")
+**Input (after improvement):**
+```
+Write an 800-word blog post about AI in healthcare for a
+non-technical audience. Include 3 use cases and a conclusion
+about future implications. Tone: informative, optimistic.
+```
+
+**Evaluation:**
+- Score: 92/100 (Excellent)
 
 ### Improve Prompts
 
-The Improve feature automatically rewrites your prompt to be more effective.
+AI-rewrites your prompt to be more specific, structured, and effective.
 
-#### How to Improve a Prompt
+#### How to Improve
 
-1. **Enter your prompt** in the "Your Prompt" text box
-2. Click the **"Improve Prompt"** button
-3. **Wait** for the AI to generate an improved version
-4. **Review** the improved prompt and reasoning
-5. **Compare** original vs. improved side-by-side
-6. Click **"Use Improved Prompt"** to replace your original
+1. Enter a prompt in the editor
+2. Click **"Improve Prompt"**
+3. Review the side-by-side comparison (Original | Improved) and the reasoning section
+4. Click **"Use Improved Version"** — the improved text is loaded into the editor, auto-saved as a draft, and the improvement panel closes
 
-#### What Gets Improved?
+#### What Gets Improved
 
-- **Clarity** - Makes instructions more specific
-- **Structure** - Organizes information logically
-- **Context** - Adds necessary background information
-- **Constraints** - Includes format, length, and style requirements
-- **Examples** - Adds examples when helpful
-
-#### Example Improvement
-
-**Original Prompt:**
-```
-Write a blog post about AI
-```
-
-**Improved Prompt:**
-```
-Write an 800-word blog post about practical applications
-of AI in healthcare for a non-technical audience.
-
-Structure:
-- Introduction: Current state of AI in medicine
-- Body: 3 specific use cases (diagnosis, treatment planning,
-  drug discovery) with real-world examples
-- Conclusion: Future implications and ethical considerations
-
-Tone: Informative, accessible, optimistic but balanced
-Style: Use simple language, avoid jargon, include 1-2 statistics
-```
-
-**Reasoning:**
-The improved version adds:
-- Specific topic focus (AI in healthcare)
-- Clear audience definition
-- Structured outline
-- Length requirement
-- Tone and style guidelines
-- Concrete deliverables
+- Clarity and specificity
+- Structure and logical flow
+- Audience definition
+- Format and length constraints
+- Model-specific optimisation
 
 ### Templates
 
-Templates let you save and reuse effective prompts.
+Reusable prompt patterns with variable support.
 
 #### Creating a Template
 
-1. Navigate to the **Templates** section
+**From the Templates section:**
+1. Navigate to **Templates**
 2. Click **"Create Template"**
-3. Fill in the form:
-   - **Name:** Descriptive title (e.g., "Blog Post Generator")
-   - **Category:** Choose from predefined categories
-   - **Description:** Brief explanation of use case
-   - **Content:** Your prompt template
+3. Fill in name, category, description, and content
 4. Click **"Create Template"**
+
+**From an evaluation result:**
+1. Evaluate any prompt
+2. Click **"Save as Template"** in the results action bar
+3. Enter a name when prompted — saved instantly to your library
 
 #### Template Variables
 
-Use placeholders in your templates:
-
-- `[Variable]` - Basic placeholder
-- `[Tone:Professional]` - Option with default value
-- `{{Variable}}` - Alternative syntax
-
-**Example Template:**
 ```
-Write a [Tone:Professional] email to [Recipient] about
-[Topic]. The email should be [Length:2-3 paragraphs]
-and include [KeyPoints].
+Write a [Tone:Professional] email to [Recipient] about [Topic].
+Length: [Length:2-3 paragraphs].
 ```
 
-#### Using Templates
+Variables can have a default value after the colon.
 
-1. **Browse** templates in the Templates section
-2. **Click** on a template card to view details
-3. **Fill in** the variable fields in the preview
-4. Click **"Use This Prompt"** to load into Evaluate section
+#### Categories
 
-#### Template Categories
+- **Creative** — Writing, storytelling, content creation
+- **Business** — Emails, reports, presentations
+- **Coding** — Code generation, debugging, documentation
+- **Education** — Lesson plans, explanations, quizzes
+- **Data** — Analysis, visualization, insights
+- **Custom** — Saved from evaluation results
 
-- **Creative** - Writing, storytelling, content creation
-- **Business** - Emails, reports, presentations
-- **Coding** - Code generation, debugging, documentation
-- **Education** - Lesson plans, explanations, quizzes
-- **Data** - Analysis, visualization, insights
+#### Using a Template
 
-#### Managing Templates
-
-- **Edit:** Click template → Modify → Save
-- **Delete:** Click "Delete" button in template details
-- **Search:** Use the search box to filter by keywords
-- **Filter:** Filter by category using dropdown
+1. Open **Templates**
+2. Find the template (search or category filter)
+3. Click on the card → fill variables → click **"Use This Prompt"**
 
 ### History
 
-History tracks all your prompt evaluations.
+Every evaluation is automatically saved to History.
 
-#### Viewing History
+#### History Dashboard
 
-1. Navigate to the **History** section
-2. Browse chronological list of evaluations
-3. View summary info: timestamp, score, model used
+At the top of the History section you'll see:
 
-#### History Features
+- **Stats bar** — Total evaluations | Avg score | Best score | Favorites count
+- **Capacity bar** — Thin progress bar showing N / limit. Turns yellow at ≥ 70% full, red at ≥ 90% full
+- **Score sparkline** — Last 10 evaluation scores as mini vertical bars, oldest left to newest right
 
-- **Chronological order** - Newest first
-- **Score visualization** - Color-coded indicators
-- **Model tracking** - See which LLM was used
-- **Favorites** - Star your best prompts
-- **Search** - Find specific evaluations
-- **Filters** - Filter by date range, score, or model
+#### Filters and Sort
 
-#### Re-running Evaluations
+| Control | Options |
+|---|---|
+| Search | Free-text search across prompt content |
+| Model | Dynamically populated from actual history |
+| Score | All Scores / Excellent (80–100) / Good (60–79) / Needs Work (0–59) |
+| Show | All Items / ⭐ Favorites Only |
+| Sort | Newest First / Oldest First / Score ↓ Best / Score ↑ Worst |
+| Period | All Time / Today / Last 7 Days / Last 30 Days |
 
-1. Click **"Re-run"** on any history item
-2. Prompt loads into the Evaluate section
-3. Run evaluation again to compare results
+Click **Clear Filters** to reset all controls at once.
 
-#### Favorites System
+#### Actions on History Items
 
-- **Add to Favorites:** Click the star icon on any history item
-- **View Favorites:** Enable "Show Favorites Only" filter
-- **Limit:** Maximum 100 favorites
-- **Use Case:** Bookmark your best-performing prompts
+- **Re-run** — Loads prompt back into the Evaluate section
+- **Favorite** — Star icon; favorited items show a ⭐ badge
+- **Delete** — Removes the item permanently
 
 #### Exporting History
 
-**Export as JSON:**
-```json
-{
-  "timestamp": "2026-01-10T15:30:00Z",
-  "prompt": "Your prompt text...",
-  "score": 85,
-  "targetModel": "Gemini 3 Pro",
-  "evaluation": {...}
-}
-```
-
-**Export as CSV:**
-Spreadsheet-compatible format with all fields
-
-**Export as PDF:**
-Formatted document with all evaluations
+- **Export MD** — Markdown document
+- **Export PDF** — Formatted PDF via jsPDF
+- **Clear History** — Deletes all items (with confirmation)
 
 ### Event Logs
 
-Event Logs provide detailed system activity tracking.
-
-#### Accessing Logs
-
-1. Navigate to the **Logs** section
-2. View chronological log entries
-3. Use filters to find specific events
+Detailed system activity log for debugging and auditing.
 
 #### Log Levels
 
-| Level | Icon | Usage |
-|-------|------|-------|
-| DEBUG 🔍 | Gray | Development information |
+| Level | Color | Usage |
+|---|---|---|
+| DEBUG 🔍 | Gray | Development detail |
 | INFO ℹ️ | Blue | Normal operations |
 | WARN ⚠️ | Yellow | Potential issues |
 | ERROR ❌ | Red | Operation failures |
-| CRITICAL 🚨 | Dark Red | System-critical issues |
+| CRITICAL 🚨 | Dark Red | System-critical events |
 
 #### Log Categories
 
-- **USER_ACTION** - Button clicks, navigation, inputs
-- **API_CALL** - LLM API requests and responses
-- **SYSTEM** - App lifecycle, initialization
-- **ERROR** - Exceptions and failures
-- **PERFORMANCE** - Response times, slow operations
-- **SECURITY** - API key management, authentication
-- **DATA** - Storage operations, exports
-
-#### Filtering Logs
-
-1. **By Level:** Select from dropdown (DEBUG, INFO, WARN, ERROR, CRITICAL)
-2. **By Category:** Filter by event type
-3. **By Date Range:** Set start and end dates
-4. **By Search:** Enter keywords to find specific logs
-
-#### Exporting Logs
-
-**JSON Format:**
-```json
-{
-  "exportDate": "2026-01-10T15:30:00Z",
-  "logCount": 150,
-  "logs": [
-    {
-      "id": "uuid-here",
-      "timestamp": "2026-01-10T14:25:30Z",
-      "level": 1,
-      "levelName": "INFO",
-      "category": "API_CALL",
-      "message": "Gemini API call successful",
-      "metadata": {
-        "model": "gemini-3-flash-preview",
-        "responseTime": "2345.67ms"
-      }
-    }
-  ]
-}
-```
-
-**CSV Format:** Spreadsheet with all log fields
-**TXT Format:** Human-readable plain text
+- **USER_ACTION** — Button clicks, navigation
+- **API_CALL** — LLM requests and responses
+- **SYSTEM** — App lifecycle, initialization
+- **ERROR** — Exceptions and stack traces
+- **PERFORMANCE** — Response times
+- **SECURITY** — API key operations
+- **DATA** — Storage reads/writes, exports
 
 #### Log Management
 
-- **Clean Old Logs:** Remove entries older than 7 days
-- **Clear All Logs:** Delete all log entries (with confirmation)
-- **Auto-rotation:** Keeps maximum 1000 entries
+- **Auto-rotation:** max 1,000 entries
 - **Retention:** 7-day automatic cleanup
-
-#### Using Logs for Troubleshooting
-
-1. **Reproduce the issue**
-2. **Open Logs section**
-3. **Filter by ERROR or CRITICAL level**
-4. **Look for error messages** around the time of the issue
-5. **Check metadata** for detailed error information
-6. **Export logs** if needed for support
+- **Clean Old Logs** — Remove entries older than 7 days
+- **Clear All Logs** — Delete all entries (with confirmation)
+- **Export** — JSON, CSV, or TXT
 
 ---
 
-## Advanced Features
+## Productivity Features
+
+### Auto-Save Draft
+
+The prompt editor auto-saves its content to localStorage every 2 seconds (debounced).
+
+- **On reload:** A "Draft Restored" toast appears with a **Discard** link
+- **Discard:** Removes the saved draft and clears the editor
+- **Auto-clear:** Draft is deleted after a successful evaluation — no stale content on next session
+
+No configuration needed; it works transparently in the background.
+
+### Results Action Bar
+
+After every successful evaluation, a thin action bar appears below the results with two buttons:
+
+| Button | Icon | What it does |
+|---|---|---|
+| Save as Template | bookmark | Prompts for a name, saves prompt to Templates |
+| Copy as Markdown | copy | Copies full evaluation as Markdown to clipboard |
+
+The bar is hidden when you clear the input or load a new evaluation.
+
+**Markdown output format:**
+```markdown
+# Prompt Evaluation
+
+**Score:** 85/100
+**Model:** Google Gemini (gemini-3-flash-preview)
+**Date:** 2/21/2026, 14:35:02
+
+## Feedback
+...
+
+## Strengths
+- Clear objective stated
+- Appropriate length constraints
+
+## Areas for Improvement
+- Missing target audience definition
+```
 
 ### Keyboard Shortcuts
 
-| Shortcut | Action |
-|----------|--------|
-| `Ctrl + Enter` | Evaluate prompt |
-| `Ctrl + S` | Save settings |
-| `Ctrl + /` | Focus search |
-| `Esc` | Close modals |
+Press `?` in any section to open the shortcut reference panel.
 
-### Textarea Resizing
+#### Global Shortcuts
 
-The prompt input box supports dynamic resizing:
+| Keys | Action |
+|---|---|
+| `Ctrl + Enter` | Evaluate the current prompt |
+| `Ctrl + S` | Save settings (Settings modal must be open) |
+| `Ctrl + /` | Focus the search field |
+| `Esc` | Close any open modal or panel |
+| `?` | Open / close keyboard shortcut reference |
 
-1. **Hover** over the bottom-right corner of the textarea
-2. **Drag** the resize handle to adjust both width and height
-3. **Minimum width:** 200px
-4. **Maximum height:** 1200px
+#### Navigation
 
-### Caching System
+Use the top navbar links to switch between Evaluate, Templates, History, and Logs.
 
-PromptMagic caches API responses for performance:
+### Theme Quick Toggle
 
-- **Cache duration:** 1 hour
-- **Cache size:** 20 entries
-- **Benefits:** Faster repeated evaluations, reduced API calls
-- **When used:** Identical prompt + system instruction + model
+The **moon / sun icon** in the navbar (between `?` and Settings) switches themes without opening Settings:
 
-### Retry Logic
+- **Moon** (currently dark) → click → switches to Professional Light
+- **Sun** (currently light) → click → switches to Sleek Dark
 
-Automatic retry on failures:
+The Settings modal `#themeSelect` stays in sync; OS preference (`prefers-color-scheme`) is respected on first load.
 
-- **Attempts:** 3 retries
-- **Delay:** Exponential backoff (2s, 4s, 8s)
-- **Triggers:** Network errors, timeouts
-- **Skip retry:** Authentication errors, invalid input
+**All available themes:**
 
-### Theme Customization
+| Theme | Description |
+|---|---|
+| Sleek Dark (default) | Modern dark with accent colors |
+| Midnight Blue | Blue-accented dark |
+| Professional Light | Clean white/gray |
+| Solarized | Warm tones, easy on the eyes |
 
-Available themes:
+### Prompt Quick Tips
 
-1. **Sleek Dark** (Default) - Modern dark theme
-2. **Midnight Blue** - Blue-accented dark theme
-3. **Professional Light** - Clean light theme
-4. **Solarized** - Easy on the eyes
+A collapsible **Quick Tips** panel sits below the character counter in the Evaluate section. Open/closed state persists between sessions (stored in localStorage).
 
-**Change theme:** Settings → Theme → Select → Save
-
-### Accessibility Features
-
-- **WCAG 2.1 Level AA** compliant
-- **Keyboard navigation** - Full app accessible via keyboard
-- **Focus indicators** - Clear visual focus states
-- **Screen reader support** - ARIA labels and live regions
-- **Skip to content** link for keyboard users
-- **Touch targets** - Minimum 44px for all interactive elements
+Tips cover: role assignment, constraint setting, output format specification, context inclusion, few-shot examples, and chain-of-thought prompting.
 
 ---
 
-## Keyboard Shortcuts
+## Settings Reference
 
-### Global Shortcuts
+Open Settings via the gear icon in the navbar or press `Ctrl + S` when the modal is open.
 
-| Keys | Action |
-|------|--------|
-| `Ctrl + Enter` | Evaluate the current prompt |
-| `Ctrl + S` | Save settings (when settings modal is open) |
-| `Esc` | Close any open modal |
-| `Tab` | Navigate to next interactive element |
-| `Shift + Tab` | Navigate to previous interactive element |
+### LLM Provider
 
-### Navigation Shortcuts
+Switch between Google Gemini (cloud) and Ollama (local). Each provider shows its own configuration fields.
 
-Click navigation links or use mouse to switch sections:
-- Evaluate
-- Templates
-- History
-- Logs
+### Theme
+
+Select from Sleek Dark, Midnight Blue, Professional Light, or Solarized. Changes apply immediately. The **moon/sun navbar button** toggles dark ↔ light without opening this modal.
+
+### History Limit
+
+Choose how many evaluation items to keep: **25**, **50** (default), **100**, or **200**.
+
+If you lower the limit below the current item count, the oldest items are trimmed immediately and a warning toast reports how many were removed.
+
+### Data Management
+
+| Button | Description |
+|---|---|
+| Export All Data | Saves all templates, history, and logs as JSON |
+| Import Data | Merges a previously exported JSON into current data |
+
+### Developer Options
+
+**Show Event Logs in navigation** — toggle the Logs nav link for a cleaner menu.
+
+### Storage Indicator
+
+The Settings footer shows real-time localStorage usage (`~142 KB / ~5 MB`) with color states:
+- Default — within normal range
+- Yellow — ≥ 70% full
+- Red — ≥ 90% full
 
 ---
 
@@ -569,60 +498,50 @@ Click navigation links or use mouse to switch sections:
 
 ### Writing Better Prompts
 
-1. **Be Specific**
-   - ❌ "Write about technology"
-   - ✅ "Write a 500-word article about blockchain technology for beginners"
+1. **Be specific**
+   - ❌ `Write about technology`
+   - ✅ `Write a 500-word article about blockchain for beginners`
 
-2. **Provide Context**
-   - Include relevant background information
-   - Define your audience
-   - Specify the use case
+2. **Define your audience** — Who will read or act on this output?
 
-3. **Set Constraints**
-   - Length requirements
-   - Format specifications
-   - Tone and style guidelines
+3. **Set constraints** — length, format (JSON, bullet points, markdown), tone, reading level
 
-4. **Use Examples**
-   - Show the desired output format
-   - Include sample inputs
-   - Reference similar successful prompts
+4. **Add examples** — show the desired output structure in your prompt
 
-5. **Iterate**
-   - Start with evaluation
-   - Use improvement suggestions
-   - Re-evaluate the improved version
-   - Save successful prompts as templates
+5. **Iterate** — evaluate → improve → re-evaluate → save as template
 
-### Choosing the Right LLM Provider
+### Using the Workflow Efficiently
 
-**Use Google Gemini when:**
-- You need the latest cutting-edge models
-- You don't want to manage local infrastructure
-- You're okay with cloud processing
-- You need reliable uptime
-
-**Use Ollama when:**
-- Privacy is a top priority
-- You want zero API costs
-- You need unlimited evaluations
-- You want to work offline
-- You have sufficient local compute resources
+- **Keyboard-first:** `Ctrl + Enter` to evaluate; `?` to check shortcuts without leaving the editor
+- **Draft safety:** Close the tab mid-prompt without worry — your work auto-saves
+- **From improvement to template:** Click "Use Improved Version" → evaluate → "Save as Template" in three clicks
+- **Share results:** "Copy as Markdown" puts the full evaluation on your clipboard, ready to paste into docs, Slack, or Notion
 
 ### Template Best Practices
 
-1. **Use descriptive names** - "Blog Post Generator - Tech Topics"
-2. **Add clear descriptions** - Explain when to use the template
-3. **Include variables** - Make templates flexible and reusable
-4. **Categorize properly** - Choose the most relevant category
-5. **Test before saving** - Evaluate the template to ensure quality
+- **Descriptive names:** `"Blog Post Generator — Tech Topics"` not `"Blog"`
+- **Include variables:** Makes templates flexible for different inputs
+- **Test before saving:** Run an evaluation to confirm quality
+- **Use categories:** Easier to find later via filter
 
-### Performance Optimization
+### History Hygiene
 
-1. **Use caching** - Re-evaluate identical prompts uses cached results
-2. **Choose appropriate models** - Use Flash models for quick tests
-3. **Batch evaluations** - Evaluate multiple prompts in one session
-4. **Clean old data** - Remove old history and logs periodically
+- Use **Sort: Score ↓ Best** to surface your best prompts quickly
+- **Favorite** any prompt scoring 80+ so it's never buried
+- Lower the **History Limit** to 25–50 if the app feels slow
+- **Export history** weekly before clearing to avoid data loss
+
+### Choosing a Provider
+
+**Use Gemini when:**
+- You need the latest cutting-edge model quality
+- You don't want to manage local infrastructure
+- Reliable uptime matters
+
+**Use Ollama when:**
+- Privacy is non-negotiable (prompts never leave your machine)
+- You want zero per-call costs
+- You work offline or on a metered connection
 
 ---
 
@@ -630,137 +549,65 @@ Click navigation links or use mouse to switch sections:
 
 ### Google Gemini Issues
 
-#### "Invalid API Key" Error
+#### "Invalid API Key"
+1. Go to Settings — verify the key has no extra spaces
+2. Regenerate at [Google AI Studio](https://makersuite.google.com/app/apikey)
+3. Paste the new key and Save
 
-**Cause:** API key is incorrect or expired
-
-**Solution:**
-1. Go to Settings
-2. Verify API key is correctly copied (no extra spaces)
-3. Generate new API key at [Google AI Studio](https://makersuite.google.com/app/apikey)
-4. Update in Settings
-
-#### "API Quota Exceeded" Error
-
-**Cause:** You've hit Google's rate limits
-
-**Solution:**
-1. Wait for quota to reset (typically daily)
-2. Check your usage at [Google Cloud Console](https://console.cloud.google.com)
-3. Consider upgrading your quota
-4. Switch to Ollama for unlimited local processing
-
-#### "Model Not Found" Error
-
-**Cause:** Model name is incorrect or deprecated
-
-**Solution:**
-1. Check [official Gemini models documentation](https://ai.google.dev/gemini-api/docs/models)
-2. Update to a supported model in Settings
-3. Use default: "gemini-3-flash-preview"
+#### "API Quota Exceeded"
+1. Wait for daily quota reset
+2. Check usage at [Google Cloud Console](https://console.cloud.google.com)
+3. Switch to Ollama for unlimited local evaluation
 
 #### Slow Response Times
-
-**Causes:**
-- Network latency
-- Model complexity
-- High load on Google's servers
-
-**Solutions:**
 1. Try a Flash model (faster than Pro)
 2. Check your internet connection
 3. Retry during off-peak hours
-4. Switch to Ollama for local processing
 
 ### Ollama Issues
 
-#### "Could Not Connect to Ollama" Error
+#### "Could Not Connect to Ollama"
+1. Run `ollama serve` in a terminal
+2. Confirm output: `Listening on http://localhost:11434`
+3. Use **Test Connection** in Settings — look for the green ✓
 
-**Cause:** Ollama service is not running
+#### "No Models Found"
+1. `ollama pull llama3.3:70b` (or any model)
+2. Wait for download to finish
+3. Click **Refresh** in Settings
 
-**Solution:**
-1. Open terminal
-2. Run: `ollama serve`
-3. Verify output shows: "Listening on http://localhost:11434"
-4. Retry in PromptMagic
+#### Endpoint Not Accessible
+1. `curl http://localhost:11434` — expect `Ollama is running`
+2. Try `http://127.0.0.1:11434` in the endpoint field
+3. Check firewall / antivirus rules
 
-#### "No Models Found" When Refreshing
-
-**Cause:** No models are installed
-
-**Solution:**
-1. Open terminal
-2. Pull a model: `ollama pull llama3.3:70b`
-3. Wait for download to complete
-4. Click "Refresh" in PromptMagic Settings
-
-#### Ollama Endpoint Not Accessible
-
-**Cause:** Wrong endpoint URL or firewall blocking
-
-**Solution:**
-1. Verify Ollama is running: `curl http://localhost:11434`
-2. Check endpoint in Settings (should be `http://localhost:11434`)
-3. Try `http://127.0.0.1:11434` instead
-4. Check firewall settings
-
-#### Model Not Responding
-
-**Causes:**
-- Model too large for available RAM
-- Ollama process crashed
-
-**Solutions:**
-1. Check Ollama logs in terminal
-2. Restart Ollama: Stop and run `ollama serve` again
-3. Try a smaller model (e.g., 7B instead of 70B)
+#### Model Not Responding / Out of Memory
+1. Check Ollama terminal for errors
+2. Restart Ollama: stop and run `ollama serve` again
+3. Switch to a smaller model (e.g., 7B or 8B)
 4. Close other memory-intensive applications
 
 ### General Issues
 
 #### "Failed to Parse Evaluation Results"
-
-**Cause:** LLM returned non-JSON response
-
-**Solution:**
-1. Retry the evaluation
+1. Retry — the LLM may have returned a non-JSON response
 2. Try a different model
-3. Simplify your prompt
-4. Check logs for detailed error
-
-#### Browser Console Errors
-
-**Cause:** JavaScript errors in the application
-
-**Solution:**
-1. Refresh the page (`Ctrl + R` or `F5`)
-2. Clear browser cache
-3. Try a different browser
-4. Check for browser updates
+3. Check Event Logs (ERROR level) for details
 
 #### Data Not Saving
-
-**Cause:** localStorage quota exceeded or disabled
-
-**Solution:**
-1. Enable cookies/localStorage in browser settings
-2. Clear old history and logs
-3. Export data and import to fresh instance
-4. Check available storage space
+1. Enable localStorage in browser settings (cookies / site data)
+2. Clear old history and logs to free space
+3. Check the Storage Indicator in Settings — if red, export and clear
 
 #### Application Running Slowly
-
-**Causes:**
-- Too many logs/history items
-- Memory leaks
-- Browser extensions interfering
-
-**Solutions:**
-1. Clean old logs (Logs → Clean Old)
-2. Clear history items
-3. Refresh the browser page
+1. Reduce History Limit to 25–50 in Settings
+2. Clean old logs: Logs → Clean Old
+3. Refresh the page
 4. Disable browser extensions temporarily
-5. Close unused browser tabs
+
+#### Draft Not Restoring
+1. Check that localStorage is enabled in your browser
+2. The draft key is `draft_prompt` — you can inspect it in DevTools → Application → Local Storage
 
 ---
 
@@ -768,143 +615,87 @@ Click navigation links or use mouse to switch sections:
 
 ### Exporting All Data
 
-1. Go to **Settings**
-2. Click **"Export All Data"**
-3. Choose save location
-4. File saved as: `promptmagic-data-[timestamp].json`
+1. Settings → **Export All Data**
+2. Choose a save location
+3. File saved as: `promptmagic-data-[timestamp].json`
+
+Includes: all templates, complete history, all event logs. API keys are excluded for security.
 
 ### Importing Data
 
-1. Go to **Settings**
-2. Click **"Import Data"**
-3. Select your exported JSON file
-4. Data merges with existing data
+1. Settings → **Import Data**
+2. Select a previously exported `.json` file
+3. Data merges with existing content (no duplicates by ID)
 
-### Backing Up Data
+### History Limit & Trimming
 
-**Recommended schedule:** Weekly
-
-**What gets backed up:**
-- All templates
-- Complete history
-- All event logs
-- Settings (excluding API keys for security)
-
-**How to backup:**
-1. Export All Data
-2. Save to cloud storage (Google Drive, Dropbox, etc.)
-3. Keep multiple versions
+Set your preferred limit in Settings → History Limit. Lowering it below the current count trims the oldest items immediately. Export first if you want to preserve them.
 
 ### Resetting the Application
 
-**To reset all data:**
+```javascript
+// In browser DevTools → Console:
+localStorage.clear();
+// Then refresh the page
+```
 
-1. Open browser developer tools (`F12`)
-2. Go to Console tab
-3. Run: `localStorage.clear()`
-4. Refresh the page
-5. Reconfigure settings
+**Warning:** This permanently deletes all templates, history, logs, and settings.
 
-**Warning:** This deletes all templates, history, and logs permanently!
+### Data Storage Details
 
-### Data Storage
-
-All data is stored locally in your browser using localStorage:
-
-- **Location:** Browser's local storage
-- **Size limit:** ~5-10MB (varies by browser)
-- **Persistence:** Data remains until manually cleared
-- **Privacy:** Data never leaves your device (except for API calls)
+| Key | Contents |
+|---|---|
+| `templates` | JSON array of template objects |
+| `history` | JSON array of evaluation records |
+| `logs` | JSON array of log entries |
+| `gemini_api_key` | Obfuscated API key |
+| `llm_provider` | `"gemini"` or `"ollama"` |
+| `theme` | Active theme name |
+| `max_history_items` | `"25"`, `"50"`, `"100"`, or `"200"` |
+| `draft_prompt` | Auto-saved textarea content |
+| `tips_open` | `"1"` or `"0"` for tips panel state |
+| `max_history_items` | Configured history limit |
 
 ---
 
-## Frequently Asked Questions
+## FAQ
 
 ### Is my data private?
 
-**Yes.** All data is stored locally in your browser. The only data sent externally is:
-- Your prompts to Google Gemini (if using Gemini)
-- Your prompts to Ollama (if using Ollama locally - stays on your machine)
-
-API keys are obfuscated before storage and never logged.
+Yes. All data lives in your browser's localStorage. The only data sent externally is your prompt text — to Google Gemini (cloud) or Ollama (local, stays on your machine). API keys are obfuscated before storage and excluded from exports.
 
 ### Can I use PromptMagic offline?
 
-**Partially:**
-- **With Gemini:** No - requires internet for API calls
-- **With Ollama:** Yes - fully offline after initial setup
-- **UI access:** Yes - the application works offline for viewing history, templates, etc.
+- **Gemini:** No — requires internet
+- **Ollama:** Yes — fully offline after initial model download
+- **UI / History / Templates:** Always accessible offline
 
-### How much does PromptMagic cost?
+### How much does it cost?
 
-**PromptMagic is free.** However:
-- **Google Gemini:** May have API costs after free tier (check Google's pricing)
-- **Ollama:** Completely free, but requires local compute resources
+PromptMagic is free. Google Gemini may incur API costs after the free tier. Ollama is free after setup.
 
-### Which LLM provider is better?
+### Which provider gives better scores?
 
-It depends on your needs:
+Scores reflect how well your prompt follows prompt-engineering best practices, not which provider you chose. The same prompt will score similarly regardless of provider.
 
-| Factor | Google Gemini | Ollama |
-|--------|---------------|--------|
-| Privacy | Cloud-based | 100% local |
-| Cost | Pay per use | Free (after setup) |
-| Performance | Excellent | Depends on hardware |
-| Ease of setup | Very easy | Moderate |
-| Model quality | Cutting-edge | Excellent open models |
-| Offline use | No | Yes |
+### Can I use both providers?
 
-### Can I use both Gemini and Ollama?
-
-**Yes!** You can switch between providers anytime in Settings. Your history will track which provider was used for each evaluation.
+Yes. Switch in Settings anytime. History records which provider was used for each evaluation.
 
 ### What happens to my API key?
 
-- Stored in browser's localStorage with basic obfuscation
-- Never transmitted except to Google's API
-- Not included in data exports for security
-- Can be deleted anytime in Settings
+- Stored with basic obfuscation in localStorage
+- Transmitted only to Google's API endpoint
+- Never included in data exports
+- Deleted when you clear localStorage or save a new key
 
 ### How accurate are the scores?
 
-Scores are AI-generated assessments based on prompt engineering best practices. They should be used as guidelines, not absolute measures. Factors evaluated include:
-- Clarity and specificity
-- Appropriate context
-- Clear constraints
-- Structure and organization
-- Model-specific optimization
+Scores are AI-generated assessments of prompt quality based on clarity, specificity, context, constraints, and model-specific best practices. Use them as directional guidance, not absolute truth.
 
-### Can I contribute to PromptMagic?
+### My history capacity bar is full — what should I do?
 
-This is a single-file application. You can:
-- Suggest features
-- Report bugs
-- Share templates with the community
-- Provide feedback on evaluations
-
----
-
-## Support & Resources
-
-### Getting Help
-
-If you encounter issues:
-
-1. **Check this guide** - Most questions are answered here
-2. **Review Troubleshooting section** - Common issues and solutions
-3. **Check Event Logs** - Detailed error information
-4. **Export logs** - For technical support
-
-### Official Documentation
-
-- **Google Gemini API:** https://ai.google.dev/gemini-api/docs
-- **Ollama Documentation:** https://github.com/ollama/ollama
-- **Bootstrap 5:** https://getbootstrap.com/docs/5.3
-
-### Model Information
-
-- **Gemini Models:** https://ai.google.dev/gemini-api/docs/models
-- **Ollama Models:** https://ollama.ai/library
+Increase the limit in Settings → History Limit, or export your history (Export MD / Export PDF) and then click Clear History.
 
 ---
 
@@ -912,20 +703,23 @@ If you encounter issues:
 
 ### Glossary
 
-- **LLM** - Large Language Model
-- **API** - Application Programming Interface
-- **Prompt** - Instructions given to an AI model
-- **Template** - Reusable prompt pattern
-- **Token** - Unit of text processing in AI models
-- **Context** - Background information provided to the AI
-- **Evaluation** - Quality assessment of a prompt
-- **localStorage** - Browser storage mechanism
+- **LLM** — Large Language Model
+- **Prompt** — Instructions given to an AI model
+- **Template** — Reusable prompt pattern with variable slots
+- **Draft** — Auto-saved, unsent prompt content
+- **Token** — Unit of text processing in AI models
+- **localStorage** — Browser-side persistent key-value storage
+- **Sparkline** — Small inline chart showing a trend at a glance
+- **Capacity bar** — Progress-bar showing history items vs. configured limit
 
 ### Version History
 
-- **v2.0** - Added Ollama support, enhanced UI, comprehensive logging
-- **v1.5** - Added templates, favorites, improved UX
-- **v1.0** - Initial release with Gemini support
+| Version | Date | Highlights |
+|---|---|---|
+| **3.0** | February 2026 | Batch 2: auto-save draft, theme quick toggle, history sort/date filter/capacity bar, configurable limit, results action bar, API duration badge, "Use Improved Version" |
+| **2.0** | January 2026 | Batch 1: onboarding banner, shortcut panel, history stats + sparkline, Ollama connection test, OS theme detection, storage indicator, prompt tips, dynamic model filter, score clamping |
+| **1.5** | — | Templates, favorites, improved UX |
+| **1.0** | — | Initial release, Google Gemini support |
 
 ### Credits
 
@@ -936,7 +730,4 @@ If you encounter issues:
 
 ---
 
-**Last Updated:** January 10, 2026
-**Application Version:** 2.0
-
-For the latest updates and information, check the application's changelog and release notes.
+**Last Updated:** February 2026 | **Application Version:** 3.0
