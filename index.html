@@ -1607,6 +1607,87 @@
         }
         .prompt-tips-list li strong { color: var(--text-primary); }
         .prompt-tips-list li + li { border-top: 1px solid rgba(255, 255, 255, 0.04); }
+
+        /* ===== BATCH-2 STYLES ===== */
+
+        /* G: API Duration Badge */
+        .eval-duration-badge {
+            font-size: 0.68rem;
+            color: var(--text-secondary);
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 999px;
+            padding: 0.1rem 0.5rem;
+            font-family: monospace;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+        }
+
+        /* F+D: Results Action Bar */
+        .results-action-bar {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.5rem 0;
+            border-top: 1px solid var(--border-color);
+            margin-top: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        /* E: History Capacity Bar */
+        .history-capacity-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 0.4rem 0 0.6rem;
+        }
+        .history-capacity-fill {
+            height: 4px;
+            border-radius: 2px;
+            background: var(--accent-primary);
+            transition: width 0.4s ease, background 0.3s ease;
+            flex: 1;
+            min-width: 0;
+        }
+        .history-capacity-bar.warn .history-capacity-fill { background: #f59e0b; }
+        .history-capacity-bar.critical .history-capacity-fill { background: #ef4444; }
+        .history-capacity-text {
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        /* B: Theme Quick Toggle */
+        .theme-quick-toggle {
+            background: none;
+            border: none;
+            padding: 0.25rem 0.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        .theme-quick-toggle i { width: 16px; height: 16px; }
+
+        /* H: Settings Row for History Limit */
+        .settings-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+        .settings-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            min-width: 120px;
+        }
+
+        /* J: Improvement Apply Row */
+        .improvement-apply-row {
+            display: flex;
+            justify-content: flex-end;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--border-color);
+            margin-top: 0.75rem;
+        }
     </style>
 </head>
 <body data-theme="sleek-dark">
@@ -1660,6 +1741,12 @@
                            title="Keyboard shortcuts (?)" aria-label="Keyboard shortcuts">
                             <span style="font-size:1.05rem;font-weight:700;line-height:1;">?</span>
                         </a>
+                    </li>
+                    <!-- BATCH-2 (B): Theme quick toggle -->
+                    <li class="nav-item">
+                        <button class="nav-link theme-quick-toggle" onclick="quickToggleTheme()" title="Toggle dark/light theme" aria-label="Toggle dark/light theme">
+                            <i data-lucide="moon" id="themeToggleIcon"></i>
+                        </button>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#" onclick="openSettingsModal()">
@@ -1763,6 +1850,7 @@
                                     <small>Or try <strong>Improve Prompt</strong> to get an AI-enhanced version.</small>
                                 </div>
                             </div>
+                            <div class="results-action-bar" id="resultsActionBar" style="display:none;" aria-label="Result actions"></div>
                         </div>
                     </div>
                 </div>
@@ -1801,9 +1889,9 @@
                             <h6 class="text-gradient mb-3">Why These Changes?</h6>
                             <div id="improvementReasoning" class="text-secondary"></div>
                         </div>
-                        <div class="mt-3">
-                            <button class="btn-primary-custom btn-icon" onclick="useImprovedPrompt()">
-                                <i data-lucide="check"></i> Use Improved Prompt
+                        <div class="improvement-apply-row">
+                            <button class="btn-primary-custom btn-icon" onclick="applyImprovedPrompt()">
+                                <i data-lucide="check"></i> Use Improved Version
                             </button>
                         </div>
                     </div>
@@ -1867,6 +1955,12 @@
                 </div>
             </div>
 
+            <!-- BATCH-2 (E): History Capacity Bar -->
+            <div id="historyCapacityBar" class="history-capacity-bar" role="progressbar" aria-label="History capacity">
+                <div class="history-capacity-fill" id="historyCapacityFill" style="width:0%"></div>
+                <span class="history-capacity-text" id="historyCapacityText"></span>
+            </div>
+
             <!-- Score Trend Mini-Chart -->
             <div id="scoreTrendChart" class="score-trend-wrap" role="img" aria-label="Last 10 evaluation score trend"></div>
 
@@ -1902,6 +1996,26 @@
                         <select id="historyFavoriteFilter" class="form-control-custom form-select" onchange="filterHistory()">
                             <option value="">All Items</option>
                             <option value="favorites">⭐ Favorites Only</option>
+                        </select>
+                    </div>
+                    <!-- BATCH-2 (C): Sort dropdown -->
+                    <div class="filter-item">
+                        <label class="form-label-custom">Sort</label>
+                        <select id="historySortBy" class="form-control-custom form-select" onchange="filterHistory()" aria-label="Sort history">
+                            <option value="">Newest First</option>
+                            <option value="oldest">Oldest First</option>
+                            <option value="score-desc">Score ↓ Best</option>
+                            <option value="score-asc">Score ↑ Worst</option>
+                        </select>
+                    </div>
+                    <!-- BATCH-2 (I): Date range filter -->
+                    <div class="filter-item">
+                        <label class="form-label-custom">Period</label>
+                        <select id="historyDateFilter" class="form-control-custom form-select" onchange="filterHistory()" aria-label="Filter by date">
+                            <option value="">All Time</option>
+                            <option value="today">Today</option>
+                            <option value="week">Last 7 Days</option>
+                            <option value="month">Last 30 Days</option>
                         </select>
                     </div>
                 </div>
@@ -2117,6 +2231,16 @@
 
                     <div class="mb-4">
                         <label class="form-label-custom">Data Management</label>
+                        <!-- BATCH-2 (H): Configurable history limit -->
+                        <div class="settings-row mb-3">
+                            <label class="settings-label" for="maxHistoryItems">History limit</label>
+                            <select id="maxHistoryItems" class="form-control-custom form-select" style="max-width:180px;">
+                                <option value="25">25 evaluations</option>
+                                <option value="50">50 evaluations</option>
+                                <option value="100">100 evaluations</option>
+                                <option value="200">200 evaluations</option>
+                            </select>
+                        </div>
                         <div class="d-flex gap-2">
                             <button type="button" class="btn-secondary-custom btn-icon flex-1" onclick="exportAllData()">
                                 <i data-lucide="download"></i> Export All Data
@@ -2237,8 +2361,11 @@
     <!-- ==================== JAVASCRIPT APPLICATION ==================== -->
     <script>
         // ==================== CONSTANTS ====================
+        // BATCH-2: Last evaluation data for copy-as-markdown (F)
+        let lastEvaluationData = null;
+
         const CONFIG = {
-            MAX_HISTORY_ITEMS: 50,
+            MAX_HISTORY_ITEMS: parseInt(localStorage.getItem('max_history_items')) || 50,
             MAX_PROMPT_LENGTH: 5000,
             MAX_TEMPLATE_LENGTH: 10000,
             MAX_FAVORITES: 100,
@@ -2596,6 +2723,59 @@
             } catch (err) {
                 showToast('Error', 'Failed to copy text', 'error');
             }
+        }
+
+        // ==================== BATCH-2: COPY AS MARKDOWN (F) ====================
+        async function copyResultAsMarkdown() {
+            if (!lastEvaluationData) { showToast('Nothing to copy', 'Evaluate a prompt first', 'warning'); return; }
+            const d = lastEvaluationData;
+            const strengths = d.strengths.map(s => `- ${s}`).join('\n') || '_(none)_';
+            const improvements = d.improvements.map(i => `- ${i}`).join('\n') || '_(none)_';
+            const md = `# Prompt Evaluation\n\n**Score:** ${d.score}/100\n**Model:** ${d.model}\n**Date:** ${new Date().toLocaleString()}\n\n## Feedback\n${d.feedback}\n\n## Strengths\n${strengths}\n\n## Areas for Improvement\n${improvements}\n\n---\n*Evaluated with PromptMagic*`;
+            try {
+                await navigator.clipboard.writeText(md);
+                showToast('Copied!', 'Evaluation copied as Markdown', 'success');
+            } catch (err) {
+                showToast('Error', 'Failed to copy to clipboard', 'error');
+            }
+        }
+
+        // ==================== BATCH-2: SAVE AS TEMPLATE (D) ====================
+        function saveCurrentPromptAsTemplate() {
+            const content = document.getElementById('promptInput').value.trim();
+            if (!content) { showToast('Empty Prompt', 'Enter a prompt before saving as template', 'warning'); return; }
+            const name = window.prompt('Enter a name for this template:');
+            if (!name || !name.trim()) return;
+            const tmpl = { id: generateId(), name: name.trim(), content, createdAt: new Date().toISOString(), category: 'Custom' };
+            appState.templates.push(tmpl);
+            localStorage.setItem('templates', JSON.stringify(appState.templates));
+            showToast('Saved', `Template "${name.trim()}" saved successfully`, 'success');
+            lucide.createIcons();
+        }
+
+        // ==================== BATCH-2: AUTO-SAVE DRAFT (A) ====================
+        const _saveDraftDebounced = debounce(function() {
+            const val = document.getElementById('promptInput')?.value || '';
+            if (val.trim()) { localStorage.setItem('draft_prompt', val); }
+            else { localStorage.removeItem('draft_prompt'); }
+        }, 2000);
+
+        function saveDraft() { _saveDraftDebounced(); }
+
+        function restoreDraft() {
+            const draft = localStorage.getItem('draft_prompt');
+            const input = document.getElementById('promptInput');
+            if (draft && input && !input.value.trim()) {
+                input.value = draft;
+                updateCharCount();
+                showToast('Draft Restored', 'Your unsaved prompt has been restored. <a href="#" onclick="discardDraft();return false;" style="color:var(--accent-primary);text-decoration:underline;">Discard</a>', 'info');
+            }
+        }
+
+        function discardDraft() {
+            localStorage.removeItem('draft_prompt');
+            const input = document.getElementById('promptInput');
+            if (input) { input.value = ''; updateCharCount(); }
         }
 
         // ==================== PROVIDER BADGE ====================
@@ -2971,6 +3151,16 @@
                 toggleLogsNav(false);
                 if (showLogsNavCheckbox) showLogsNavCheckbox.checked = false;
             }
+
+            // BATCH-2 (A): Attach auto-save draft input listener
+            const _draftInput = document.getElementById('promptInput');
+            if (_draftInput) _draftInput.addEventListener('input', saveDraft);
+
+            // BATCH-2 (A): Restore any previously auto-saved draft
+            restoreDraft();
+
+            // BATCH-2 (B): Sync theme toggle icon to current theme
+            updateThemeToggleIcon();
 
             // Initialize evaluate layout from saved preference
             const savedLayout = localStorage.getItem('evaluate_layout');
@@ -3418,7 +3608,9 @@ Consider:
 - Output format specifications
 - ${targetModel}-specific best practices`;
 
+            const _t0 = performance.now();
             const response = await callLLMAPI(promptText, systemInstruction);
+            const _evalDuration = ((performance.now() - _t0) / 1000).toFixed(1) + 's';
 
             // Remove loading state
             if (button) setButtonLoading(button, false);
@@ -3433,7 +3625,10 @@ Consider:
                     evaluation.score = clampScore(evaluation.score);
 
                     // Display results
-                    displayEvaluationResults(evaluation, promptText, targetModel);
+                    displayEvaluationResults(evaluation, promptText, targetModel, _evalDuration);
+
+                    // BATCH-2: Clear the auto-saved draft since we've successfully evaluated
+                    localStorage.removeItem('draft_prompt');
 
                     // Save to history
                     saveToHistory(promptText, targetModel, evaluation);
@@ -3470,7 +3665,16 @@ Consider:
             }
         }
 
-        function displayEvaluationResults(evaluation, promptText, targetModel) {
+        function displayEvaluationResults(evaluation, promptText, targetModel, duration) {
+            // Store for copy-as-markdown and discard-draft
+            lastEvaluationData = {
+                score: evaluation.score,
+                feedback: (evaluation.feedback || []).join('\n'),
+                strengths: evaluation.strengths || [],
+                improvements: evaluation.improvements || [],
+                model: targetModel
+            };
+
             // Determine score level for styling
             let scoreLevel, statusText, statusIcon;
             if (evaluation.score < 40) {
@@ -3491,6 +3695,8 @@ Consider:
                 statusIcon = 'award';
             }
 
+            const durationBadge = duration ? `<span class="eval-duration-badge">~${duration}</span>` : '';
+
             const resultsHTML = `
                 <div class="score-container ${scoreLevel === 'critical' ? 'score-critical' : ''}">
                     <div class="score-circle" style="--score: 0" data-score-level="${scoreLevel}">
@@ -3501,6 +3707,7 @@ Consider:
                         <i data-lucide="${statusIcon}"></i>
                         <span>${statusText}</span>
                         <span class="sr-only">Score is ${evaluation.score} out of 100</span>
+                        ${durationBadge}
                     </div>
                 </div>
 
@@ -3533,6 +3740,21 @@ Consider:
             `;
 
             document.getElementById('evaluationResults').innerHTML = resultsHTML;
+
+            // Show and populate results action bar (F + D)
+            const actionBar = document.getElementById('resultsActionBar');
+            if (actionBar) {
+                actionBar.innerHTML = `
+                    <button class="btn-secondary-custom btn-sm btn-icon" onclick="saveCurrentPromptAsTemplate()" title="Save prompt as template">
+                        <i data-lucide="bookmark"></i> Save as Template
+                    </button>
+                    <button class="btn-secondary-custom btn-sm btn-icon" onclick="copyResultAsMarkdown()" title="Copy result as Markdown">
+                        <i data-lucide="copy"></i> Copy as Markdown
+                    </button>
+                `;
+                actionBar.style.display = 'flex';
+            }
+
             lucide.createIcons();
 
             // Animate the score circle and number
@@ -3626,9 +3848,25 @@ Make the prompt:
             }
         }
 
+        // BATCH-2 (J): Apply improved prompt with draft save + UX feedback
+        function applyImprovedPrompt() {
+            if (!appState.lastImprovedPrompt) { showToast('Nothing to apply', 'Improve a prompt first', 'warning'); return; }
+            document.getElementById('promptInput').value = appState.lastImprovedPrompt;
+            document.getElementById('improvementSection').style.display = 'none';
+            updateCharCount();
+            saveDraft();
+            showToast('Applied', 'Improved version loaded — evaluate when ready!', 'info');
+        }
+
         function clearInput() {
             document.getElementById('promptInput').value = '';
             document.getElementById('improvementSection').style.display = 'none';
+            // BATCH-2: hide results action bar and clear stored data
+            lastEvaluationData = null;
+            const actionBar = document.getElementById('resultsActionBar');
+            if (actionBar) { actionBar.style.display = 'none'; actionBar.innerHTML = ''; }
+            discardDraft();
+            updateCharCount();
         }
 
         // ==================== TEMPLATE ENGINE ====================
@@ -3986,11 +4224,26 @@ Make the prompt:
 
         // ==================== SEARCH & FILTER ====================
 
+        // BATCH-2 (C): Sort history items
+        function sortHistory(items) {
+            const sortBy = document.getElementById('historySortBy')?.value || '';
+            if (!sortBy) return items; // newest first (already the default order)
+            return items.slice().sort((a, b) => {
+                switch (sortBy) {
+                    case 'oldest': return new Date(a.timestamp) - new Date(b.timestamp);
+                    case 'score-desc': return b.score - a.score;
+                    case 'score-asc': return a.score - b.score;
+                    default: return 0;
+                }
+            });
+        }
+
         function filterHistory() {
             const searchTerm = document.getElementById('historySearch')?.value.toLowerCase() || '';
             const modelFilter = document.getElementById('historyModelFilter')?.value || '';
             const scoreFilter = document.getElementById('historyScoreFilter')?.value || '';
             const favoriteFilter = document.getElementById('historyFavoriteFilter')?.value || '';
+            const dateFilter = document.getElementById('historyDateFilter')?.value || '';
 
             let filtered = appState.history;
 
@@ -4017,6 +4270,22 @@ Make the prompt:
                 filtered = filtered.filter(item => isFavorite(item.id));
             }
 
+            // BATCH-2 (I): Date range filter
+            if (dateFilter) {
+                let cutoff;
+                if (dateFilter === 'today') {
+                    cutoff = new Date(); cutoff.setHours(0, 0, 0, 0);
+                } else if (dateFilter === 'week') {
+                    cutoff = new Date(Date.now() - 7 * 86400000);
+                } else if (dateFilter === 'month') {
+                    cutoff = new Date(Date.now() - 30 * 86400000);
+                }
+                if (cutoff) filtered = filtered.filter(item => new Date(item.timestamp) >= cutoff);
+            }
+
+            // BATCH-2 (C): Sort
+            filtered = sortHistory(filtered);
+
             renderFilteredHistory(filtered);
         }
 
@@ -4025,6 +4294,11 @@ Make the prompt:
             document.getElementById('historyModelFilter').value = '';
             document.getElementById('historyScoreFilter').value = '';
             document.getElementById('historyFavoriteFilter').value = '';
+            // BATCH-2: Reset sort and date filters
+            const sortSel = document.getElementById('historySortBy');
+            if (sortSel) sortSel.value = '';
+            const dateSel = document.getElementById('historyDateFilter');
+            if (dateSel) dateSel.value = '';
             filterHistory();
         }
 
@@ -4089,11 +4363,29 @@ Make the prompt:
             lucide.createIcons();
         }
 
+        // ==================== BATCH-2: HISTORY CAPACITY BAR (E) ====================
+
+        function renderHistoryCapacity() {
+            const fill = document.getElementById('historyCapacityFill');
+            const text = document.getElementById('historyCapacityText');
+            const container = document.getElementById('historyCapacityBar');
+            if (!fill || !text || !container) return;
+            const n = appState.history.length;
+            const max = CONFIG.MAX_HISTORY_ITEMS;
+            const pct = max > 0 ? Math.min(100, Math.round((n / max) * 100)) : 0;
+            fill.style.width = pct + '%';
+            text.textContent = `${n} / ${max} evaluations`;
+            container.classList.remove('warn', 'critical');
+            if (pct >= 90) container.classList.add('critical');
+            else if (pct >= 70) container.classList.add('warn');
+        }
+
         // ==================== HISTORY STATS BAR ====================
 
         function renderHistoryStats() {
             const bar = document.getElementById('historyStatsBar');
             if (!bar) return;
+            renderHistoryCapacity();
             const history = appState.history;
             if (history.length === 0) { bar.innerHTML = ''; return; }
 
@@ -4361,6 +4653,9 @@ Make the prompt:
 
         function openSettingsModal() {
             updateStorageIndicator();
+            // BATCH-2 (H): Sync history limit select
+            const maxSel = document.getElementById('maxHistoryItems');
+            if (maxSel) maxSel.value = String(CONFIG.MAX_HISTORY_ITEMS);
             const modal = new bootstrap.Modal(document.getElementById('settingsModal'));
             modal.show();
         }
@@ -4422,6 +4717,21 @@ Make the prompt:
                     endpoint: ollamaEndpoint,
                     model: finalModel
                 });
+            }
+
+            // BATCH-2 (H): Save configurable history limit
+            const maxHistSel = document.getElementById('maxHistoryItems');
+            if (maxHistSel) {
+                const newMax = parseInt(maxHistSel.value) || 50;
+                CONFIG.MAX_HISTORY_ITEMS = newMax;
+                localStorage.setItem('max_history_items', String(newMax));
+                if (appState.history.length > newMax) {
+                    const removed = appState.history.length - newMax;
+                    appState.history = appState.history.slice(0, newMax);
+                    localStorage.setItem('history', JSON.stringify(appState.history));
+                    showToast('History Trimmed', `Removed ${removed} oldest item(s) to fit the new limit`, 'warning');
+                    renderHistory();
+                }
             }
 
             // Save logs nav toggle preference
@@ -4596,6 +4906,30 @@ Make the prompt:
 
             // FIX BUG-009: Re-render icons after theme change to update colors
             setTimeout(() => lucide.createIcons(), 100);
+
+            // BATCH-2 (B): Keep quick toggle icon in sync
+            updateThemeToggleIcon();
+        }
+
+        // BATCH-2 (B): Theme quick toggle — moon/sun navbar button
+        function updateThemeToggleIcon() {
+            const icon = document.getElementById('themeToggleIcon');
+            if (!icon) return;
+            const isDark = ['sleek-dark', 'midnight-blue'].includes(appState.theme);
+            icon.setAttribute('data-lucide', isDark ? 'moon' : 'sun');
+            lucide.createIcons();
+        }
+
+        function quickToggleTheme() {
+            const isDark = ['sleek-dark', 'midnight-blue'].includes(appState.theme);
+            const target = isDark ? 'professional-light' : 'sleek-dark';
+            appState.theme = target;
+            document.body.setAttribute('data-theme', target);
+            localStorage.setItem('theme', target);
+            // Sync the settings modal select if it's open
+            const themeSel = document.getElementById('themeSelect');
+            if (themeSel) themeSel.value = target;
+            updateThemeToggleIcon();
         }
 
         // ==================== LOGS VIEWER ====================
